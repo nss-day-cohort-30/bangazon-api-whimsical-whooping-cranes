@@ -7,5 +7,17 @@ namespace BangazonAPI.Models
 {
     public class Employee
     {
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+
+        public bool IsSuperVisor { get; set; }
+        public List<Computer> ComputerHistory { get; set; }
+
+        public List<TrainingProgram> trainingPrograms { get; set; }
+
+        public Department department { get; set; }
+        
+
     }
 }
