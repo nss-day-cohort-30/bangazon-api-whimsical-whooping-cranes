@@ -37,7 +37,7 @@ namespace BangazonAPI.Controllers
             _config = config;
         }
 
-        private SqlConnection Connection
+        public SqlConnection Connection
         {
             get
             {
@@ -47,14 +47,24 @@ namespace BangazonAPI.Controllers
 
         // GET api/values
         [HttpGet]
-        public async Task<IActionResult> GetCustomers(int Id, string FirstName, string LastName)
+        public async Task<IActionResult> GetCustomers()
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "Write your SQL statement here to get all customers";
+                    cmd.CommandText = @"SELECT c.id, c.FirstName, c.LastName,
+                    p.Id, p.ProductTypeId, p.Title, p.Quantity, p.Price, p.[Description], p.CustomerId,
+                    m.Id, m.Name, m.AcctNumber,
+                    o.PaymentTypeId, o.Id, o.CustomerId
+                    FROM Customer c
+                    JOIN PaymentType m ON m.CustomerId = c.Id
+                    JOIN[Order] o ON o.PaymentTypeId = m.Id
+                    JOIN Product p ON p.CustomerId = c.Id
+                    JOIN ProductType t ON t.Id = p.ProductTypeId
+                    JOIN OrderProduct op ON op.OrderId = o.Id
+                    ";
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
                     List<Customer> customers = new List<Customer>();
@@ -180,10 +190,6 @@ namespace BangazonAPI.Controllers
 
         // DELETE api/values/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-        }
-
         private bool CustomerExists(int id)
         {
             using (SqlConnection conn = Connection)
