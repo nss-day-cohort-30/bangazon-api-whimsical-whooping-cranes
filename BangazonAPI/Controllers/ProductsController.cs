@@ -13,11 +13,11 @@ namespace BangazonAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CustomersController : ControllerBase
+    public class ProductsController : ControllerBase
     {
         private readonly IConfiguration _config;
 
-        public CustomersController(IConfiguration config)
+        public ProductsController(IConfiguration config)
         {
             _config = config;
         }
@@ -39,18 +39,26 @@ namespace BangazonAPI.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "Write your SQL statement here to get all customers";
+                    cmd.CommandText = @"SELECT p.Id, p.Price, p.Title, p.Description, p.Quantity,
+                                        p.CustomerId, p.ProductTypeId, c.FirstName, c.LastName, t.Name
+                                         FROM Product p 
+                                         JOIN Customer c ON p.CustomerId = c.id
+                                         JOIN ProductType t ON p.ProductTypeId = t.id";
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
-                    List<Customer> customers = new List<Customer>();
+                    List<Product> products = new List<Product>();
                     while (reader.Read())
                     {
                         Customer customer = new Customer
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Price = reader.GetString(reader.GetOrdinal("FirstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                            // You might have more columns
+                            Price = reader.GetString(reader.GetOrdinal("Price")),
+                            Title = reader.GetString(reader.GetOrdinal("Title")),
+                            Description = reader.GetString(reader.GetOrdinal("Description")),
+                            Quantity = reader.GetInt32(reader.GetOrdinal("Quantity")),
+
+
+
                         };
 
                         customers.Add(customer);
