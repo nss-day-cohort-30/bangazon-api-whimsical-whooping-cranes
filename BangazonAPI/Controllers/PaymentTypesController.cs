@@ -65,7 +65,7 @@ namespace BangazonAPI.Controllers
         }
 
         //GET api/values/5
-        [HttpGet("{id}", Name ="GetPaymentType")]
+        [HttpGet("{id}", Name = "GetPaymentType")]
         public async Task<IActionResult> Get(int id)
         {
             using (SqlConnection conn = Connection)
@@ -113,7 +113,7 @@ namespace BangazonAPI.Controllers
                     cmd.Parameters.Add(new SqlParameter("@AcctNumber", paymentType.AcctNumber));
                     cmd.Parameters.Add(new SqlParameter("@Name", paymentType.Name));
                     cmd.Parameters.Add(new SqlParameter("@CustomerID", paymentType.CustomerId));
-                    
+
 
                     int newId = (int)await cmd.ExecuteScalarAsync();
                     paymentType.Id = newId;
@@ -133,16 +133,18 @@ namespace BangazonAPI.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = @"
+                        cmd.CommandText = $@"
                             UPDATE PaymentType
-                            SET AcctNumber = @AcctNumber
-                            Name = @Name
-                            CustomerId = @CustomerId 
+                            SET AcctNumber = @AcctNumber,
+                            Name = @Name,
+                            CustomerId = @CustomerId
                             WHERE Id = @id
                         ";
                         cmd.Parameters.Add(new SqlParameter("@AcctNumber", paymentType.AcctNumber));
                         cmd.Parameters.Add(new SqlParameter("@Name", paymentType.Name));
                         cmd.Parameters.Add(new SqlParameter("@CustomerID", paymentType.CustomerId));
+                        cmd.Parameters.Add(new SqlParameter("@id", paymentType.Id));
+
 
                         int rowsAffected = await cmd.ExecuteNonQueryAsync();
 
@@ -157,7 +159,7 @@ namespace BangazonAPI.Controllers
             }
             catch (Exception)
             {
-                if (!CustomerExists(id))
+                if (!PaymentTypeExists(id))
                 {
                     return NotFound();
                 }
@@ -168,28 +170,58 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        //// DELETE api/values/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> Delete(int id)
-        //{
-        //}
+        // DELETE api/values/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete([FromRoute] int id)
+        {
+            try
+            {
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"DELETE FROM PaymentType WHERE Id = @id";
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
 
-        //private bool CustomerExists(int id)
-        //{
-        //    using (SqlConnection conn = Connection)
-        //    {
-        //        conn.Open();
-        //        using (SqlCommand cmd = conn.CreateCommand())
-        //        {
-        //            // More string interpolation
-        //            cmd.CommandText = "SELECT Id FROM Customer WHERE Id = @id";
-        //            cmd.Parameters.Add(new SqlParameter("@id", id));
+                        int rowsAffected = await cmd.ExecuteNonQueryAsync();
+                        if (rowsAffected > 0)
+                        {
+                            return new StatusCodeResult(StatusCodes.Status204NoContent);
+                        }
+                        throw new Exception("No rows affected");
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                if (!PaymentTypeExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
 
-        //            SqlDataReader reader = cmd.ExecuteReader();
 
-        //            return reader.Read();
-        //        }
-        //    }
-        //}
+        private bool PaymentTypeExists(int id)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT Id FROM PaymentType WHERE Id = @id";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    return reader.Read();
+                }
+            }
+
+        }
     }
 }
