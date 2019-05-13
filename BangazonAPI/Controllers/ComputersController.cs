@@ -98,13 +98,22 @@ namespace BangazonAPI.Controllers
 
                     if (reader.Read())
                     {
+                        DateTime? decomissiondate = null;
+
+                        if (!reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
+                        {
+
+
+                            decomissiondate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate"));
+                        }
+
                         computer = new Computer
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Make = reader.GetString(reader.GetOrdinal("Make")),
                             Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer")),
                             PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
-                            DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate")),
+                            DecomissionDate = decomissiondate,
                         };
                     }
                     reader.Close();
