@@ -48,7 +48,7 @@ namespace BangazonAPI.Controllers
                         Customer customer = new Customer
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Price = reader.GetString(reader.GetOrdinal("FirstName")),
+                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                             LastName = reader.GetString(reader.GetOrdinal("LastName")),
                             // You might have more columns
                         };
@@ -82,7 +82,7 @@ namespace BangazonAPI.Controllers
                         customer = new Customer
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            Price = reader.GetString(reader.GetOrdinal("FirstName")),
+                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                             LastName = reader.GetString(reader.GetOrdinal("LastName")),
                             // You might have more columns
                         };
@@ -110,7 +110,7 @@ namespace BangazonAPI.Controllers
                         OUTPUT INSERTED.Id
                         VALUES ()
                     ";
-                    cmd.Parameters.Add(new SqlParameter("@firstName", customer.Price));
+                    cmd.Parameters.Add(new SqlParameter("@firstName", customer.FirstName));
 
                     customer.Id = (int) await cmd.ExecuteScalarAsync();
 
@@ -137,7 +137,7 @@ namespace BangazonAPI.Controllers
                             WHERE Id = @id
                         ";
                         cmd.Parameters.Add(new SqlParameter("@id", customer.Id));
-                        cmd.Parameters.Add(new SqlParameter("@firstName", customer.Price));
+                        cmd.Parameters.Add(new SqlParameter("@firstName", customer.FirstName));
 
                         int rowsAffected = await cmd.ExecuteNonQueryAsync();
 
@@ -163,11 +163,11 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-        }
+        //// DELETE api/values/5
+        //[HttpDelete("{id}")]
+        //public IActionResult Delete(int id)
+        //{
+        //}
 
         private bool CustomerExists(int id)
         {
