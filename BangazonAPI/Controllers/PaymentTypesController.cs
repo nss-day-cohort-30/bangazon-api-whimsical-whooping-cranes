@@ -68,6 +68,10 @@ namespace BangazonAPI.Controllers
         [HttpGet("{id}", Name = "GetPaymentType")]
         public async Task<IActionResult> Get(int id)
         {
+            if (!PaymentTypeExists(id))
+            {
+                return new StatusCodeResult(StatusCodes.Status404NotFound);
+            }
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
