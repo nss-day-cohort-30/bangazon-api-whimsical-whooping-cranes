@@ -147,7 +147,7 @@ namespace BangazonAPI.Controllers
                         cmd.Parameters.Add(new SqlParameter("@AcctNumber", paymentType.AcctNumber));
                         cmd.Parameters.Add(new SqlParameter("@Name", paymentType.Name));
                         cmd.Parameters.Add(new SqlParameter("@CustomerID", paymentType.CustomerId));
-                        cmd.Parameters.Add(new SqlParameter("@id", paymentType.Id));
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
 
 
                         int rowsAffected = await cmd.ExecuteNonQueryAsync();

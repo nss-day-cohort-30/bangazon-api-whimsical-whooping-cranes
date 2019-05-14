@@ -83,6 +83,33 @@ namespace TestBangazonAPI
                 Assert.Equal("Test Payment Name", newTestPaymentType.Name);
                 Assert.Equal(1, newTestPaymentType.CustomerId);
 
+                int newAcctNumber = 1234567;
+
+                PaymentType modifiedPaymentType = new PaymentType
+                {
+                    AcctNumber = newAcctNumber,
+                    Name = "Johns BigBank",
+                    CustomerId = 1
+                };
+                var modifiedPaymentTypeJSON = JsonConvert.SerializeObject(modifiedPaymentType);
+
+                var modifiedResponse = await client.PutAsync(
+                    $"api/PaymentTypes/{newTestPaymentType.Id}",
+                    new StringContent(modifiedPaymentTypeJSON, Encoding.UTF8, "application/json")
+                );
+                modifiedResponse.EnsureSuccessStatusCode();
+                string modifiedResponseBody = await modifiedResponse.Content.ReadAsStringAsync();
+
+                Assert.Equal(HttpStatusCode.NoContent, modifiedResponse.StatusCode);
+
+                var getPaymentType = await client.GetAsync($"api/PaymentTypes/{newTestPaymentType.Id}");
+                getPaymentType.EnsureSuccessStatusCode();
+
+                string getPaymentTypeBody = await getPaymentType.Content.ReadAsStringAsync();
+                PaymentType newPaymentType = JsonConvert.DeserializeObject<PaymentType>(getPaymentTypeBody);
+
+                Assert.Equal(HttpStatusCode.OK, getPaymentType.StatusCode);
+                Assert.Equal(newAcctNumber, newPaymentType.AcctNumber);
 
                 var deleteResponse = await client.DeleteAsync($"api/PaymentTypes/{newTestPaymentType.Id}");
                 deleteResponse.EnsureSuccessStatusCode();
@@ -90,7 +117,10 @@ namespace TestBangazonAPI
             }
         }
 
-        [Fact]
+        
+    
+
+    [Fact]
         public async Task Test_Get_NonExistant_Payment_Type_Fails()
         {
 
