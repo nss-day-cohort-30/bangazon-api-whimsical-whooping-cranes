@@ -89,6 +89,10 @@ namespace BangazonAPI.Controllers
         [HttpGet("{id}", Name = "GetProduct") ]
         public async Task<IActionResult> Get(int id)
         {
+            if (!ProductExists(id))
+            {
+                return new StatusCodeResult(StatusCodes.Status404NotFound);
+            }
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
@@ -98,7 +102,8 @@ namespace BangazonAPI.Controllers
                                         p.CustomerId, p.ProductTypeId, c.FirstName, c.LastName, t.Name
                                          FROM Product p 
                                          JOIN Customer c ON p.CustomerId = c.id
-                                         JOIN ProductType t ON p.ProductTypeId = t.id";
+                                         JOIN ProductType t ON p.ProductTypeId = t.id
+                                           WHERE @id = p.Id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
@@ -112,9 +117,9 @@ namespace BangazonAPI.Controllers
                             Title = reader.GetString(reader.GetOrdinal("Title")),
                             Description = reader.GetString(reader.GetOrdinal("Description")),
                             Quantity = reader.GetInt32(reader.GetOrdinal("Quantity")),
-                            //CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
-                            //ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
-                            Customer = new Customer
+                             CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                             ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                             Customer = new Customer
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("Id")),
                                 FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
@@ -134,7 +139,7 @@ namespace BangazonAPI.Controllers
 
                     reader.Close();
 
-                    return Ok();
+                    return Ok(product);
                 }
             }
         }
