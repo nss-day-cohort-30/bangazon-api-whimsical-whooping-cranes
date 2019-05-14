@@ -40,7 +40,7 @@ namespace BangazonAPI.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "SELECT Id, Name, FROM Product";
+                    cmd.CommandText = "SELECT Id, Name, StartDate, EndDate, MaxAttendees FROM Product";
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
                     List<TrainingProgram> trainingPrograms = new List<TrainingProgram>();
 
@@ -50,7 +50,9 @@ namespace BangazonAPI.Controllers
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
-
+                            StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                            EndDate = reader.GetDateTime(reader.GetOrdinal("EndTime")),
+                            MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendee")),
                         };
 
                         trainingPrograms.Add(trainingProgram);
@@ -76,10 +78,10 @@ namespace BangazonAPI.Controllers
                 {
                     cmd.CommandText = @"
                         SELECT
-                            Id, Name
+                            Id, Name, StartDate, EndDate, MaxAttendees, 
                         FROM TrainingProgram
                         WHERE Id = @id";
-                    cmd.Parameters.Add(new SqlParameter("@id", id));
+                    cmd.Parameters.Add(new SqlParameter("@id", id));                  cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
                     TrainingProgram trainingProgram = null;
@@ -90,6 +92,9 @@ namespace BangazonAPI.Controllers
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             Name = reader.GetString(reader.GetOrdinal("Name")),
+                            StartDate = reader.GetDateTime(reader.GetOrdinal("StartDate")),
+                            EndDate = reader.GetDateTime(reader.GetOrdinal("EndTime")),
+                            MaxAttendees = reader.GetInt32(reader.GetOrdinal("MaxAttendee")),
                         };
                     }
                     reader.Close();
@@ -109,8 +114,11 @@ namespace BangazonAPI.Controllers
                 {
                     cmd.CommandText = @"INSERT INTO TrainingProgram (Name)
                                         OUTPUT INSERTED.Id
-                                        VALUES (@Name)";
+                                        VALUES (@Name, @StartDate, @EndDate, @MaxAttendees)";
                     cmd.Parameters.Add(new SqlParameter("Name", trainingProgram.Name));
+                    cmd.Parameters.Add(new SqlParameter("StartDate", trainingProgram.StartDate));
+                    cmd.Parameters.Add(new SqlParameter("EndDate", trainingProgram.EndDate));
+                    cmd.Parameters.Add(new SqlParameter("MaxAttendees", trainingProgram.MaxAttendees));
 
                     int newId = (int)await cmd.ExecuteScalarAsync();
                     trainingProgram.Id = newId;
@@ -132,8 +140,16 @@ namespace BangazonAPI.Controllers
                         cmd.CommandText = @"UPDATE TrainingProgram
                                             SET 
                                                 Name = @Name
+                                                StartDate = @StartDate
+                                                EndDate = @EndDate
+                                                MaxAttendee = @MaxAttendees
                                             WHERE Id = @id";
                         cmd.Parameters.Add(new SqlParameter("@Name", trainingProgram.Name));
+                        cmd.Parameters.Add(new SqlParameter("StartDate", trainingProgram.StartDate));
+                        cmd.Parameters.Add(new SqlParameter("EndDate", trainingProgram.EndDate));
+                        cmd.Parameters.Add(new SqlParameter("MaxAttendees", trainingProgram.MaxAttendees));
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
+
 
 
                         int rowsAffected = await cmd.ExecuteNonQueryAsync();
@@ -201,7 +217,7 @@ namespace BangazonAPI.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                        SELECT Id, Name,
+                        SELECT Id, Name, StartDate, EndDate, MaxAttendees,
                         FROM TrainingProgram
                         WHERE Id = @id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
