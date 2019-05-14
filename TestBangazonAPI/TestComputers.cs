@@ -114,43 +114,81 @@ namespace TestBangazonAPI
         }
 
         [Fact]
-        public async Task Test_Modify_Computer()
+        public async Task Test_Create_Modify_And_Delete_Computer()
         {
-            // New last name to change to and test
-            string newMake = "Macbook Pro 3000";
 
+            DateTime purchasedate = DateTime
             using (var client = new APIClientProvider().Client)
             {
-                /*
-                    PUT section
-                 */
-                Computer modifiedMacBook = new Computer
+                Computer test = new Computer
                 {
-                    Make = newMake,
-                    Manufacturer = "Apple",
+                  Make = "test",
+                  Manufacturer = "test",
+                  PurchaseDate = DateTime.Now,
+                  DecomissionDate = DateTime.Now
                 };
-                var modifiedKateAsJSON = JsonConvert.SerializeObject(modifiedMacBook);
+                var testAsJSON = JsonConvert.SerializeObject(test);
 
-                var response = await client.PutAsync(
-                    "/computers/1",
-                    new StringContent(modifiedKateAsJSON, Encoding.UTF8, "application/json")
+
+                var response = await client.PostAsync(
+                    "/computers",
+                    new StringContent(testAsJSON, Encoding.UTF8, "application/json")
+                );
+
+                response.EnsureSuccessStatusCode();
+
+                string responseBody = await response.Content.ReadAsStringAsync();
+                var newTest = JsonConvert.DeserializeObject<Computer>(responseBody);
+
+                Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+                Assert.Equal("test", newTest.Make);
+                Assert.Equal("test", newTest.Manufacturer);
+                Assert.Equal(1431434, newTest.Price);
+                //////////////////////////////
+                ///
+
+                string newTitle = "NEWTESTTITLE";
+
+                /*
+                   PUT section
+                */
+                Product modifiedProduct = new Product
+                {
+                    Title = "NEWTESTTITLE",
+                    Description = "testestst",
+                    Price = 1431434,
+                    Quantity = 2,
+                    ProductTypeId = 1,
+                    CustomerId = 1
+                };
+                var modifiedProductAsJSON = JsonConvert.SerializeObject(modifiedProduct);
+
+                var Modifyresponse = await client.PutAsync(
+                    $"/api/products/{newTest.Id}",
+                    new StringContent(modifiedProductAsJSON, Encoding.UTF8, "application/json")
                 );
                 response.EnsureSuccessStatusCode();
-                string responseBody = await response.Content.ReadAsStringAsync();
+                string ModifyresponseBody = await Modifyresponse.Content.ReadAsStringAsync();
 
-                Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+                Assert.Equal(HttpStatusCode.NoContent, Modifyresponse.StatusCode);
 
                 /*
                     GET section
                  */
-                var getMacBook = await client.GetAsync("/computers/1");
-                getMacBook.EnsureSuccessStatusCode();
+                var getProduct = await client.GetAsync($"/api/products/{newTest.Id}");
+                getProduct.EnsureSuccessStatusCode();
 
-                string getMacBody = await getMacBook.Content.ReadAsStringAsync();
-                Computer newMacBook = JsonConvert.DeserializeObject<Computer>(getMacBody);
+                string getProductBody = await getProduct.Content.ReadAsStringAsync();
+                Product newProduct = JsonConvert.DeserializeObject<Product>(getProductBody);
 
-                Assert.Equal(HttpStatusCode.OK, getMacBook.StatusCode);
-                Assert.Equal(newMake, newMacBook.Make);
+                Assert.Equal(HttpStatusCode.OK, getProduct.StatusCode);
+                Assert.Equal(newTitle, newProduct.Title);
+
+
+                //DELETE TEST
+                var deleteResponse = await client.DeleteAsync($"/api/products/{newProduct.Id}");
+                deleteResponse.EnsureSuccessStatusCode();
+                Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
             }
         }
     }
