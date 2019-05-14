@@ -9,22 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
-
-//GET
-//POST
-//PUT
-//User should be able to GET a list of customers, and GET a single customer.
-//If the query string parameter of? _include = products is provided, then any products that the customer is selling should be included in the response.
-//  If the query string parameter of? _include = payments is provided, then any payment types that the customer has used to pay for an order should be included in the response.
-//If the query string parameter of q is provided when querying the list of customers, then any customer that has property value that matches the pattern should be returned.
-//If /customers? q = mic is requested, then any customer whose first name is Michelle, or Michael, or Domicio should be returned.Any customer whose last name is Michaelangelo, or Omici, Dibromic should be returned. Every property of the customer object should be checked for a match.
-
-
-//  Testing Criteria
-//  Write a testing class and test methods that validate the GET single, GET all, POST, and PUT operations work as expected.
 namespace BangazonAPI.Controllers
-
-
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -37,7 +22,7 @@ namespace BangazonAPI.Controllers
             _config = config;
         }
 
-        public SqlConnection Connection
+        private SqlConnection Connection
         {
             get
             {
@@ -47,24 +32,14 @@ namespace BangazonAPI.Controllers
 
         // GET api/values
         [HttpGet]
-        public async Task<IActionResult> GetCustomers()
+        public async Task<IActionResult> Get()
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"SELECT c.id, c.FirstName, c.LastName,
-                    p.Id, p.ProductTypeId, p.Title, p.Quantity, p.Price, p.[Description], p.CustomerId,
-                    m.Id, m.Name, m.AcctNumber,
-                    o.PaymentTypeId, o.Id, o.CustomerId
-                    FROM Customer c
-                    JOIN PaymentType m ON m.CustomerId = c.Id
-                    JOIN[Order] o ON o.PaymentTypeId = m.Id
-                    JOIN Product p ON p.CustomerId = c.Id
-                    JOIN ProductType t ON t.Id = p.ProductTypeId
-                    JOIN OrderProduct op ON op.OrderId = o.Id
-                    ";
+                    cmd.CommandText = "SELECT Id, FirstName, LastName FROM Customer";
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
                     List<Customer> customers = new List<Customer>();
@@ -137,7 +112,7 @@ namespace BangazonAPI.Controllers
                     ";
                     cmd.Parameters.Add(new SqlParameter("@firstName", customer.FirstName));
 
-                    customer.Id = (int) await cmd.ExecuteScalarAsync();
+                    customer.Id = (int)await cmd.ExecuteScalarAsync();
 
                     return CreatedAtRoute("GetCustomer", new { id = customer.Id }, customer);
                 }
@@ -190,6 +165,8 @@ namespace BangazonAPI.Controllers
 
         // DELETE api/values/5
         [HttpDelete("{id}")]
+ 
+
         private bool CustomerExists(int id)
         {
             using (SqlConnection conn = Connection)
