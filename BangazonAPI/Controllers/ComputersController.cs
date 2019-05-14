@@ -191,13 +191,16 @@ namespace BangazonAPI.Controllers
                     {
                         cmd.CommandText = sql;
                         cmd.Parameters.Add(new SqlParameter("@make", computer.Make));
-                        cmd.Parameters.Add(new SqlParameter("@manufacturer", computer.Manufacturer ?? ""));
+                        cmd.Parameters.Add(new SqlParameter("@manufacturer", computer.Manufacturer));
                         cmd.Parameters.Add(new SqlParameter("@purchasedate", computer.PurchaseDate));
                         cmd.Parameters.Add(new SqlParameter("@id", id));
 
-                        int newId = (int)await cmd.ExecuteScalarAsync();
-                        computer.Id = newId;
-                        return CreatedAtRoute("GetComputer", new { id = newId }, computer);
+                        int rowsAffected = cmd.ExecuteNonQuery();
+                        if (rowsAffected > 0)
+                        {
+                            return new StatusCodeResult(StatusCodes.Status204NoContent);
+                        }
+                        throw new Exception("No rows affected");
 
                     }
                 }
@@ -211,14 +214,17 @@ namespace BangazonAPI.Controllers
                                             DecomissionDate = @decomissiondate
                                         WHERE Id = @id";
                     cmd.Parameters.Add(new SqlParameter("@make", computer.Make));
-                    cmd.Parameters.Add(new SqlParameter("@manufacturer", computer.Manufacturer ?? ""));
+                    cmd.Parameters.Add(new SqlParameter("@manufacturer", computer.Manufacturer));
                     cmd.Parameters.Add(new SqlParameter("@purchasedate", computer.PurchaseDate));
                     cmd.Parameters.Add(new SqlParameter("@decomissiondate", computer.DecomissionDate));
                     cmd.Parameters.Add(new SqlParameter("@id", id));
 
-                    int newId = (int)await cmd.ExecuteScalarAsync();
-                    computer.Id = newId;
-                    return CreatedAtRoute("GetComputer", new { id = newId }, computer);
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    if (rowsAffected > 0)
+                    {
+                        return new StatusCodeResult(StatusCodes.Status204NoContent);
+                    }
+                    throw new Exception("No rows affected");
                 }
             }
         }

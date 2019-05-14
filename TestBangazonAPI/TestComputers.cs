@@ -117,15 +117,20 @@ namespace TestBangazonAPI
         public async Task Test_Create_Modify_And_Delete_Computer()
         {
 
-            DateTime purchasedate = DateTime
+
             using (var client = new APIClientProvider().Client)
             {
+
+                DateTime purchasedate = DateTime.Now;
+
+                DateTime decomissiondate = DateTime.Now;
+
                 Computer test = new Computer
                 {
                   Make = "test",
                   Manufacturer = "test",
-                  PurchaseDate = DateTime.Now,
-                  DecomissionDate = DateTime.Now
+                  PurchaseDate = purchasedate,
+                  DecomissionDate = decomissiondate
                 };
                 var testAsJSON = JsonConvert.SerializeObject(test);
 
@@ -143,29 +148,29 @@ namespace TestBangazonAPI
                 Assert.Equal(HttpStatusCode.Created, response.StatusCode);
                 Assert.Equal("test", newTest.Make);
                 Assert.Equal("test", newTest.Manufacturer);
-                Assert.Equal(1431434, newTest.Price);
+                Assert.Equal(purchasedate, newTest.PurchaseDate);
+                Assert.Equal(decomissiondate, newTest.DecomissionDate);
                 //////////////////////////////
                 ///
 
-                string newTitle = "NEWTESTTITLE";
+                string newMake = "test number two";
 
                 /*
                    PUT section
                 */
-                Product modifiedProduct = new Product
+                Computer modifiedComputer = new Computer
                 {
-                    Title = "NEWTESTTITLE",
-                    Description = "testestst",
-                    Price = 1431434,
-                    Quantity = 2,
-                    ProductTypeId = 1,
-                    CustomerId = 1
+                    Make = "test",
+                    Manufacturer = "test",
+                    PurchaseDate = purchasedate,
+                    DecomissionDate = decomissiondate
+     
                 };
-                var modifiedProductAsJSON = JsonConvert.SerializeObject(modifiedProduct);
+                var modifiedComputerAsJSON = JsonConvert.SerializeObject(modifiedComputer);
 
                 var Modifyresponse = await client.PutAsync(
-                    $"/api/products/{newTest.Id}",
-                    new StringContent(modifiedProductAsJSON, Encoding.UTF8, "application/json")
+                    $"/computers/{newTest.Id}",
+                    new StringContent(modifiedComputerAsJSON, Encoding.UTF8, "application/json")
                 );
                 response.EnsureSuccessStatusCode();
                 string ModifyresponseBody = await Modifyresponse.Content.ReadAsStringAsync();
@@ -175,18 +180,18 @@ namespace TestBangazonAPI
                 /*
                     GET section
                  */
-                var getProduct = await client.GetAsync($"/api/products/{newTest.Id}");
-                getProduct.EnsureSuccessStatusCode();
+                var getComputer = await client.GetAsync($"/computers/{newTest.Id}");
+                getComputer.EnsureSuccessStatusCode();
 
-                string getProductBody = await getProduct.Content.ReadAsStringAsync();
-                Product newProduct = JsonConvert.DeserializeObject<Product>(getProductBody);
+                string getComputerBody = await getComputer.Content.ReadAsStringAsync();
+                Computer newComputer = JsonConvert.DeserializeObject<Computer>(getComputerBody);
 
-                Assert.Equal(HttpStatusCode.OK, getProduct.StatusCode);
-                Assert.Equal(newTitle, newProduct.Title);
+                Assert.Equal(HttpStatusCode.OK, getComputer.StatusCode);
+                Assert.Equal(newMake, newComputer.Make);
 
 
                 //DELETE TEST
-                var deleteResponse = await client.DeleteAsync($"/api/products/{newProduct.Id}");
+                var deleteResponse = await client.DeleteAsync($"/computers/{newComputer.Id}");
                 deleteResponse.EnsureSuccessStatusCode();
                 Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
             }
