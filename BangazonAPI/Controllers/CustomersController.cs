@@ -76,7 +76,7 @@ namespace BangazonAPI.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText =$@"SELECT Id, FirstName, LastName FROM Customer WHERE @Id = {id}";
+                    cmd.CommandText =$@"SELECT Id, FirstName, LastName FROM Customer WHERE @Id = id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
