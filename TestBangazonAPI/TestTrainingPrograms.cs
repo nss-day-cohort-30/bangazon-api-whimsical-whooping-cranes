@@ -11,85 +11,85 @@ using System.Text;
 
 namespace TestBangazonAPI
 {
-    public class TestProductTypes
+    public class TestTrainingPrograms
     {
         [Fact]
-        public async Task Test_Get_All_ProductTypes()
+        public async Task Test_Get_All_TrainingPrograms()
         {
             using (var client = new APIClientProvider().Client)
             {
-                var response = await client.GetAsync("/productTypes");
+                var response = await client.GetAsync("/trainingPrograms");
 
                 string responseBody = await response.Content.ReadAsStringAsync();
-                var productTypes = JsonConvert.DeserializeObject<List<ProductType>>(responseBody);
+                var trainingPrograms = JsonConvert.DeserializeObject<List<TrainingProgram>>(responseBody);
 
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                Assert.True(productTypes.Count > 0);
+                Assert.True(trainingPrograms.Count > 0);
             }
         }
 
         [Fact]
-        public async Task Test_Get_Single_ProductType()
+        public async Task Test_Get_Single_TrainingProgram()
         {
             using (var client = new APIClientProvider().Client)
             {
-                var response = await client.GetAsync("/productTypes/1");
+                var response = await client.GetAsync("/trainingPrograms/1");
 
                 response.EnsureSuccessStatusCode();
 
                 string responseBody = await response.Content.ReadAsStringAsync();
-                var productType = JsonConvert.DeserializeObject<ProductType>(responseBody);
+                var trainingProgram = JsonConvert.DeserializeObject<TrainingProgram>(responseBody);
 
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                Assert.Equal("James Farrel Parephernalia", productType.Name);
-                Assert.NotNull(productType);
+                Assert.Equal("James Farrel Parephernalia", trainingProgram.Name);
+                Assert.NotNull(trainingProgram);
             }
         }
 
         [Fact]
-        public async Task Test_Get_NonExistant_ProductType_Fails()
+        public async Task Test_Get_NonExistant_TrainingProgram_Fails()
         {
             using (var client = new APIClientProvider().Client)
             {
-                var response = await client.GetAsync("/productTypes/999999999");
+                var response = await client.GetAsync("/trainingPrograms/999999999");
                 Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
             }
         }
 
         [Fact]
-        public async Task Test_Create_And_Delete_ProductType()
+        public async Task Test_Create_And_Delete_TrainingProgram()
         {
             using (var client = new APIClientProvider().Client)
             {
-                ProductType grenades = new ProductType
+                TrainingProgram grenades = new TrainingProgram
                 {
                     Name = "Grenades"
                 };
                 var grenadesAsJSON = JsonConvert.SerializeObject(grenades);
 
                 var response = await client.PostAsync(
-                    "/productTypes",
+                    "/traingingPrograms",
                     new StringContent(grenadesAsJSON, Encoding.UTF8, "application/json")
                 );
 
                 response.EnsureSuccessStatusCode();
 
                 string responseBody = await response.Content.ReadAsStringAsync();
-                var newGrenades = JsonConvert.DeserializeObject<ProductType>(responseBody);
+                var newGrenades = JsonConvert.DeserializeObject<TrainingProgram>(responseBody);
 
                 Assert.Equal(HttpStatusCode.Created, response.StatusCode);
                 Assert.Equal("Grenades", newGrenades.Name);
 
                 // Delete the newly posted object
 
-                var deleteResponse = await client.DeleteAsync($"/productTypes/{newGrenades.Id}");
+                var deleteResponse = await client.DeleteAsync($"/trainingPrograms/{newGrenades.Id}");
                 deleteResponse.EnsureSuccessStatusCode();
                 Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
             }
         }
 
         [Fact]
-        public async Task Test_Delete_NonExistent_ProductType_Fails()
+        public async Task Test_Delete_NonExistent_TrainingProgram_Fails()
         {
             using (var client = new APIClientProvider().Client)
             {
@@ -101,7 +101,7 @@ namespace TestBangazonAPI
         }
 
         [Fact]
-        public async Task Test_Modify_ProductType()
+        public async Task Test_Modify_TrainingProgram()
         {
             // New quantity to change to and test
             string newName = "Chairs";
@@ -111,15 +111,15 @@ namespace TestBangazonAPI
                 /*
                     PUT section
                  */
-                ProductType modifiedProductType = new ProductType
+                TrainingProgram modifiedTrainingProgram = new TrainingProgram
                 {
                     Name = newName
                 };
-                var modifiedProductTypeAsJSON = JsonConvert.SerializeObject(modifiedProductType);
+                var modifiedTrainingProgramAsJSON = JsonConvert.SerializeObject(modifiedTrainingProgram);
 
                 var response = await client.PutAsync(
-                    "/productTypes/1002",
-                    new StringContent(modifiedProductTypeAsJSON, Encoding.UTF8, "application/json")
+                    "/trainingPrograms/1002",
+                    new StringContent(modifiedTrainingProgramAsJSON, Encoding.UTF8, "application/json")
                 );
                 response.EnsureSuccessStatusCode();
                 string responseBody = await response.Content.ReadAsStringAsync();
@@ -129,14 +129,14 @@ namespace TestBangazonAPI
                 /*
                     GET section
                  */
-                var getTestProductType = await client.GetAsync("/productTypes/1002");
-                getTestProductType.EnsureSuccessStatusCode();
+                var getTestTrainingProgram = await client.GetAsync("/trainingPrograms/1002");
+                getTestTrainingProgram.EnsureSuccessStatusCode();
 
-                string getTestProductTypeBody = await getTestProductType.Content.ReadAsStringAsync();
-                ProductType newTestProductType = JsonConvert.DeserializeObject<ProductType>(getTestProductTypeBody);
+                string getTestTrainingProgramBody = await getTestTrainingProgram.Content.ReadAsStringAsync();
+                TrainingProgram newTestTrainingProgram = JsonConvert.DeserializeObject<TrainingProgram>(getTestTrainingProgramBody);
 
-                Assert.Equal(HttpStatusCode.OK, getTestProductType.StatusCode);
-                Assert.Equal(newName, newTestProductType.Name);
+                Assert.Equal(HttpStatusCode.OK, getTestTrainingProgram.StatusCode);
+                Assert.Equal(newName, newTestTrainingProgram.Name);
             }
         }
     }
