@@ -12,7 +12,7 @@ using Microsoft.Extensions.Configuration;
 /*
     Purpose: Controller for PaymentTypes
     Author: Mo Silvera
-    Methods: Get single, Get all, Post, Put, and Delete
+    Methods: Get single, Get all, Post, Put, and Delete, PaymentTypeExists
   */
 
 namespace BangazonAPI.Controllers
