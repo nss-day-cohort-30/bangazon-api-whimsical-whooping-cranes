@@ -184,6 +184,7 @@ namespace BangazonAPI.Controllers
 
 
         //allows user to edit an object in the database (PUT method)
+        //takes the argument of type computer and the id of the computer the user is editing
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Computer computer)
