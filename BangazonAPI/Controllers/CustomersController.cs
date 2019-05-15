@@ -34,18 +34,24 @@ namespace BangazonAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetCustomers(string pdq)
         {
+            //This includes related products in the response
             string sql = @"SELECT
-                        c.Id, c.FirstName, c.LastName, p.Title, p.Id, p.ProductTypeId, p.Description, p.Quantity, p.CustomerId
+                        c.Id, c.FirstName, c.LastName
                         FROM Customer c 
-                        JOIN Product p ON p.CustomerId = c.Id
                         WHERE 2=2";
+
+            //this will neglect related product list
             if (pdq != null)
             {
                 sql = $@"SELECT c.Id, c.FirstName, c.LastName, p.Title
                         FROM Customer c
-                        JOIN Product p ON p.CustomerId = c.Id";
+                        left JOIN Product p ON c.Id = p.CustomerId";
             }
-            //more if statements here if there are more requirements for specificity
+            {
+                sql = $@"SELECT c.Id, c.FirstName, c.LastName
+                        FROM Customer c";
+            }
+
 
             using (SqlConnection conn = Connection)
             {
@@ -60,11 +66,11 @@ namespace BangazonAPI.Controllers
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
                     Dictionary<int, Customer> customerHashForProductsListed = new Dictionary<int, Customer>();
-                    while(reader.Read())
+                    while (reader.Read())
                     {
                         int customerId = reader.GetInt32(reader.GetOrdinal("Id"));
 
-                        if(!customerHashForProductsListed.ContainsKey(customerId))
+                        if (!customerHashForProductsListed.ContainsKey(customerId))
                         {
                             customerHashForProductsListed[customerId] = new Customer
                             {
@@ -72,19 +78,19 @@ namespace BangazonAPI.Controllers
                                 FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                                 LastName = reader.GetString(reader.GetOrdinal("LastName")),
                             };
+                          
                             customerHashForProductsListed[customerId].CustomerProducts.Add(new Product
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("Id")),
                                 Title = reader.GetString(reader.GetOrdinal("Title")),
                                 ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
-                                Description= reader.GetString(reader.GetOrdinal("Description")),
-                                Quantity= reader.GetInt32(reader.GetOrdinal("Quantity")),
+                                Description = reader.GetString(reader.GetOrdinal("Description")),
+                                Quantity = reader.GetInt32(reader.GetOrdinal("Quantity")),
                                 CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId"))
                             });
-
                         }
                     }
-                                       
+
                     List<Customer> customers = customerHashForProductsListed.Values.ToList();
                     reader.Close();
 
@@ -93,22 +99,29 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        // GET api/values/5
+        // GET specific customer information
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id, string pdq)
         {
+            if (!CustomerExists(id))
+            {
+                return new StatusCodeResult(StatusCodes.Status404NotFound);
+            }
 
+            //This will get specific customer info AND related products if additional argument is passed in w/ the customer id.
             string sql = @"SELECT
-                        c.Id, c.FirstName, c.LastName, p.Title, p.Id, p.ProductTypeId, p.Description, p.Quantity, p.CustomerId
-                        FROM Customer c 
-                        JOIN Product p ON p.CustomerId = c.Id
+                        c.Id, c.FirstName, c.LastName
+                        FROM Customer c
                         WHERE 2=2";
+
             if (pdq != null)
             {
                 sql = $@"SELECT c.Id, c.FirstName, c.LastName, p.Title
                         FROM Customer c
-                        JOIN Product p ON p.CustomerId = c.Id";
+                         left JOIN Product p ON c.Id = p.CustomerId";
             }
+
+
             // add an IF not found error here
             {
                 using (SqlConnection conn = Connection)
@@ -120,7 +133,7 @@ namespace BangazonAPI.Controllers
 
                         cmd.CommandText = $@"SELECT c.Id, c.FirstName, c.LastName, p.Title, p.Id, p.ProductTypeId, p.Description, p.Quantity, p.CustomerId
                     FROM Customer c 
-                    JOIN Product p ON p.CustomerId = c.Id
+                    left JOIN Product p ON p.CustomerId = c.Id
                     WHERE @Id = c.id";
 
                         cmd.Parameters.Add(new SqlParameter("@id", id));
@@ -128,7 +141,6 @@ namespace BangazonAPI.Controllers
                         SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
                         Customer customer = null;
-                        List<Product> RelatedProducts = new List<Product>();
 
                         if (reader.Read())
                         {
@@ -138,6 +150,9 @@ namespace BangazonAPI.Controllers
                                 FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                                 LastName = reader.GetString(reader.GetOrdinal("LastName")),
                             };
+                            if (!reader.IsDBNull(reader.GetOrdinal("Title")))
+                            {
+
                             customer.CustomerProducts.Add(new Product
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("Id")),
@@ -147,7 +162,10 @@ namespace BangazonAPI.Controllers
                                 Quantity = reader.GetInt32(reader.GetOrdinal("Quantity")),
                                 CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId"))
                             });
+                            }
+
                         }
+
 
                         reader.Close();
 
@@ -165,7 +183,7 @@ namespace BangazonAPI.Controllers
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
-                    
+
                 {
                     // More string interpolation
                     cmd.CommandText = @"
@@ -228,7 +246,7 @@ namespace BangazonAPI.Controllers
 
         // DELETE api/values/5
         [HttpDelete("{id}")]
- 
+
 
         private bool CustomerExists(int id)
         {
