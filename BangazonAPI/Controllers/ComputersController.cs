@@ -9,8 +9,17 @@ using System.Data.SqlClient;
 using BangazonAPI.Models;
 using Microsoft.AspNetCore.Http;
 
+
+/*
+    Purpose: Controller for Computer Class
+    Author: Abbey Brown
+    Methods: Get single, Get all, Post, Put, and Delete
+
+ */
 namespace BangazonAPI.Controllers
 {
+
+
     [Route("[controller]")]
     [ApiController]
     public class ComputersController : ControllerBase
@@ -31,6 +40,7 @@ namespace BangazonAPI.Controllers
         }
 
 
+        //allows user to get all the computers from the database
         [HttpGet]
         public async Task<IActionResult> GetComputers()
         {
@@ -73,6 +83,8 @@ namespace BangazonAPI.Controllers
             }
         }
 
+
+        //allows user to get single computer from the database
 
         [HttpGet("{id}", Name = "GetComputer")]
         public async Task<IActionResult> Get([FromRoute] int id)
@@ -124,7 +136,7 @@ namespace BangazonAPI.Controllers
         }
    
       
-
+        //allows user to post to the database
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Computer computer)
         {
@@ -170,6 +182,8 @@ namespace BangazonAPI.Controllers
             }
         }
 
+
+        //allows user to edit an object in the database (PUT method)
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Computer computer)
@@ -229,6 +243,8 @@ namespace BangazonAPI.Controllers
             }
         }
 
+
+        //allows user to delete object from the database (Delete Method)
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
@@ -264,7 +280,8 @@ namespace BangazonAPI.Controllers
             }
         }
 
-
+        //boolean to check and see if the computer exists in the database
+        //this method takes the argument of the computer id that is the primary key implemented by each method
         private bool ComputerExists(int id)
         {
             using (SqlConnection conn = Connection)
