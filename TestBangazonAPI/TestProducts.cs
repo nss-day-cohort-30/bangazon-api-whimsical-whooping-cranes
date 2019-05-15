@@ -12,6 +12,13 @@ namespace TestBangazonAPI
 {
     public class TestProducts
     {
+        //Purpose: Test class for Product Controller
+        //Author: Katerina Freeman
+        //Methods: Testing get all products, get single product,
+        //create edit and delete product, delete nonexistent product, and get noneistent product. 
+
+        //This Test will check if the Get all products Http request is working. 
+        //If it fails, go to the ProductsController to make sure it is still functioning properly. 
         [Fact]
         public async Task Test_Get_All_Products()
         {
@@ -32,6 +39,9 @@ namespace TestBangazonAPI
             }
         }
 
+
+        //This Test checks if the Http request to get a single product is successful.
+        //If it fails, go to the ProductsController to see if the get single product request is still functioning properly.
         [Fact]
         public async Task Test_Get_Single_Product()
         {
@@ -52,11 +62,17 @@ namespace TestBangazonAPI
             }
         }
 
+
+        //This test checks three Http requests at once. It tests Post(creating) a new product Http request first. 
+        //It then tests the Put(edit) Http request using the product it just created. Finally it checks the delete
+        // Http request to delete a product by deleting the new product we just modified. If it fails, go to the 
+        //Products controller and depending on the error, check the Post, Put, or Delete Http requests.
         [Fact]
         public async Task Test_Create_Modify_And_Delete_Product()
         {
             using (var client = new APIClientProvider().Client)
             {
+                //POST section
                 Product test = new Product
                 {
                    Title = "test",
@@ -131,6 +147,9 @@ namespace TestBangazonAPI
             }
         }
 
+
+        //This test checks if the Delete Http request will delete a product that does not exist. If it fails, 
+        //go to the productsController and check the Delete Http request.
         [Fact]
         public async Task Test_Delete_NonExistent_Product_Fails()
         {
@@ -142,6 +161,10 @@ namespace TestBangazonAPI
                 Assert.Equal(HttpStatusCode.NotFound, deleteResponse.StatusCode);
             }
         }
+
+        //This test checks if the Get a nonexistent product will get a product that doesn't exist. If it
+        //fails go the the get Single Products Http request in ProductsController andmake sure it is still
+        //functioning properly.
 
         [Fact]
         public async Task Test_Get_NonExitant_Product_Fails()
