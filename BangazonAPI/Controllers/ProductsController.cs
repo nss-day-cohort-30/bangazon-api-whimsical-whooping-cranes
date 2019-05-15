@@ -31,6 +31,8 @@ namespace BangazonAPI.Controllers
         }
 
         // GET api/values
+        // this HTTP Request gets all Products while joinging Customer and ProductType so that you can
+        // see the customer who created said product and the producttype. 
         [HttpGet]
         public async Task<IActionResult> Get()
         {
@@ -56,8 +58,8 @@ namespace BangazonAPI.Controllers
                             Title = reader.GetString(reader.GetOrdinal("Title")),
                             Description = reader.GetString(reader.GetOrdinal("Description")),
                             Quantity = reader.GetInt32(reader.GetOrdinal("Quantity")),
-                            //CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
-                            //ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                            CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                            ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
                             Customer = new Customer
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("Id")),
@@ -86,6 +88,8 @@ namespace BangazonAPI.Controllers
         }
 
          //GET api/values/5
+         //This HTTP request gets a single product by Id. An example url to pull back one product is
+         // Http://localhost:5000/api/products/1
         [HttpGet("{id}", Name = "GetProduct") ]
         public async Task<IActionResult> Get(int id)
         {
@@ -143,7 +147,7 @@ namespace BangazonAPI.Controllers
                 }
             }
         }
-
+        // This Http request allows you to create a new product
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Product product)
         {
@@ -168,6 +172,7 @@ namespace BangazonAPI.Controllers
             }
         }
 
+        //This Http request allows you to edit an existing product.
         [HttpPut("{id}")]
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Product product)
         {
@@ -216,7 +221,7 @@ namespace BangazonAPI.Controllers
             }
         }
 
-
+        //This Http request allows you to delete a specific product from the database.
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
@@ -252,7 +257,7 @@ namespace BangazonAPI.Controllers
             }
         }
 
-
+        // This function checks if a product exists in the database by checking against it's Id. 
         private bool ProductExists(int id)
         {
             using (SqlConnection conn = Connection)
