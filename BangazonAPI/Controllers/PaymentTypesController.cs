@@ -9,6 +9,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
+/*
+    Purpose: Controller for PaymentTypes
+    Author: Mo Silvera
+    Methods: Get single, Get all, Post, Put, and Delete, PaymentTypeExists
+  */
+
 namespace BangazonAPI.Controllers
 {
     [Route("api/[controller]")]
@@ -30,7 +36,7 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        // GET api/values
+        // GET ALL
         [HttpGet]
         public async Task<IActionResult> Get()
         {
@@ -64,7 +70,7 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        //GET api/values/5
+        //GET ONE takes Id of desired PaymentType as an argument
         [HttpGet("{id}", Name = "GetPaymentType")]
         public async Task<IActionResult> Get(int id)
         {
@@ -102,7 +108,7 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        // POST api/values
+        // POST takes argument of type PaymentType 
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] PaymentType paymentType)
         {
@@ -126,7 +132,8 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        //// PUT api/values/5
+        // PUT takes Id of the PaymentType you want to edit as first argument
+        //second argument is the modified PaymentType object you want to PUT
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] PaymentType paymentType)
         {
@@ -174,7 +181,7 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        // DELETE api/values/5
+        // DELETE takes Id of the PaymentType you want to delete as an argument
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
@@ -210,7 +217,8 @@ namespace BangazonAPI.Controllers
             }
         }
 
-
+        /*Boolean that will indicate if a payment type exists
+         * takes the Id of the payament type to check as an argument */
         private bool PaymentTypeExists(int id)
         {
             using (SqlConnection conn = Connection)
