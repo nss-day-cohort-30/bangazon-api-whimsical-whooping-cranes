@@ -32,33 +32,60 @@ namespace BangazonAPI.Controllers
 
         // GET api/values
         [HttpGet]
-        public async Task<IActionResult> GetCustomers()
+        public async Task<IActionResult> GetCustomers(string pdq)
         {
+            string sql = @"SELECT
+                        c.Id, c.FirstName, c.LastName, p.Title, p.Id, p.ProductTypeId, p.Description, p.Quantity, p.CustomerId
+                        FROM Customer c 
+                        JOIN Product p ON p.CustomerId = c.Id
+                        WHERE 2=2";
+            if (pdq!= null)
+            {
+                sql = $@"SELECT c.Id, c.FirstName, c.LastName, p.Title
+                        FROM Customer c
+                        JOIN Product p ON p.CustomerId = c.Id";
+            }
+            //more if statements here if there are more requirements for specificity
+
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "SELECT Id, FirstName, LastName FROM Customer";
-
+                    cmd.CommandText = sql;
+                    if (pdq != null)
+                    {
+                        cmd.Parameters.Add(new SqlParameter("@p.Id", pdq));
+                    }
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
-                    List<Customer> customers = new List<Customer>();
-
-                    //If the query string parameter of? _include = products is provided, then any products that the customer is selling should be included in the response.
-                    while (reader.Read())
+                    Dictionary<int, Customer> customerHashForProductsListed = new Dictionary<int, Customer>();
+                    while(reader.Read())
                     {
-                        Customer customer = new Customer
+                        int customerId = reader.GetInt32(reader.GetOrdinal("Id"));
+
+                        if(!customerHashForProductsListed.ContainsKey(customerId))
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                            // You might have more columns
-                        };
+                            customerHashForProductsListed[customerId] = new Customer
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                            };
+                            customerHashForProductsListed[customerId].CustomerProducts.Add(new Product
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Title = reader.GetString(reader.GetOrdinal("Title")),
+                                ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                                Description= reader.GetString(reader.GetOrdinal("Description")),
+                                Quantity= reader.GetInt32(reader.GetOrdinal("Quantity")),
+                                   CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId"))
+                            });
 
-                        customers.Add(customer);
+                        }
                     }
-
+                                       
+                    List<Customer> customers = customerHashForProductsListed.Values.ToList();
                     reader.Close();
 
                     return Ok(customers);
@@ -68,7 +95,7 @@ namespace BangazonAPI.Controllers
 
         // GET api/values/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id, string pq)
+        public async Task<IActionResult> Get(int id, string pdq)
 
             // add an IF not found error here
         {
@@ -80,17 +107,13 @@ namespace BangazonAPI.Controllers
                 {
                     cmd.CommandText = $@"SELECT c.Id, c.FirstName, c.LastName, p.Title
                     FROM Customer c 
-                    JOIN Products p ON p.CustomerId = c.Id
+                    JOIN Product p ON p.CustomerId = c.Id
                     WHERE @Id = c.id";
 
                     cmd.Parameters.Add(new SqlParameter("@id", id));
 
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
-                                      //if(pd is = "?_include = products")
-                    //{
-                    //    Sql = $"{sql} AND c.Id = p.CustomerId"
-                    //}
 
                     Customer customer = null;
                     List<Product> RelatedProducts = new List<Product>();
