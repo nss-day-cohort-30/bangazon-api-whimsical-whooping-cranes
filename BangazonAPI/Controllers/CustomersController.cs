@@ -68,27 +68,38 @@ namespace BangazonAPI.Controllers
 
         // GET api/values/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
+        public async Task<IActionResult> Get(int id, string pq)
 
+            // add an IF not found error here
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
+                    
                 {
-                    cmd.CommandText =$@"SELECT c.Id, c.FirstName, c.LastName
+                    cmd.CommandText = $@"SELECT c.Id, c.FirstName, c.LastName, p.Title
                     FROM Customer c 
-                    Join Products p ON p.CustomerId = c.Id
+                    JOIN Product p ON p.CustomerId = c.Id
                     WHERE @Id = id";
+
                     cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                    SqlDataReader reader = await cmd.ExecuteReaderAsync();
+
+                    if (pq != null)
+                    {
+                        sql = $"{cmd.Parameters} AND p.CustomerId = c.Id";
+                    }
 
                     //if(pd is = "?_include = products")
                     //{
                     //    Sql = $"{sql} AND c.Id = p.CustomerId"
                     //}
-                    SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
                     Customer customer = null;
+                    List<Product> RelatedProducts = new List<Product>();
+
                     if (reader.Read())
                     {
                         customer = new Customer
@@ -96,6 +107,7 @@ namespace BangazonAPI.Controllers
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                             LastName = reader.GetString(reader.GetOrdinal("LastName")),
+
                         };
                     }
 
@@ -114,6 +126,7 @@ namespace BangazonAPI.Controllers
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
+                    
                 {
                     // More string interpolation
                     cmd.CommandText = @"
