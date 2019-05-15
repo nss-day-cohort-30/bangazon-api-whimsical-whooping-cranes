@@ -32,7 +32,7 @@ namespace BangazonAPI.Controllers
 
         // GET api/values
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> GetCustomers()
         {
             using (SqlConnection conn = Connection)
             {
@@ -40,9 +40,12 @@ namespace BangazonAPI.Controllers
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = "SELECT Id, FirstName, LastName FROM Customer";
+
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
                     List<Customer> customers = new List<Customer>();
+
+                    //If the query string parameter of? _include = products is provided, then any products that the customer is selling should be included in the response.
                     while (reader.Read())
                     {
                         Customer customer = new Customer
@@ -66,13 +69,14 @@ namespace BangazonAPI.Controllers
         // GET api/values/5
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
+
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = "Write your SQL statement here to get a single customer";
+                    cmd.CommandText =$@"SELECT Id, FirstName, LastName FROM Customer WHERE @Id = {id}";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
@@ -84,7 +88,6 @@ namespace BangazonAPI.Controllers
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
                             FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                             LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                            // You might have more columns
                         };
                     }
 
