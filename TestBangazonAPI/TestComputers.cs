@@ -8,17 +8,19 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 
+/*
+    Purpose: Controller for Computer Class
+    Author: Abbey Brown
+    Methods: Testing Get All, Get Single, Post, Put and Delete methods
+
+ */
 namespace TestBangazonAPI
 {
     public class TestComputers
     {
 
-        Computer macbookSuperPro = new Computer
-        {
-            Make = "MacBook Super Pro",
-            Manufacturer = "Apple",
-            PurchaseDate = DateTime.Now,
-        };
+      
+        //test to get all computers from the database
         [Fact]
         public async Task Test_Get_All_Computers()
         {
@@ -37,6 +39,8 @@ namespace TestBangazonAPI
             }
         }
 
+        //test to get single computer from the database
+
         [Fact]
         public async Task Test_Get_Single_Computer()
         {
@@ -51,12 +55,12 @@ namespace TestBangazonAPI
                 var computer = JsonConvert.DeserializeObject<Computer>(responseBody);
 
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                Assert.Equal("Mojave", computer.Make);
-                Assert.Equal("Apple", computer.Manufacturer);
                 Assert.NotNull(computer);
             }
         }
 
+
+        //tests for a not found if the computer does not exist in the database if user is trying to get single computer
         [Fact]
         public async Task Test_Get_NonExitant_Computer_Fails()
         {
@@ -68,6 +72,8 @@ namespace TestBangazonAPI
             }
         }
 
+
+        //test that creates and deletes a computer from the database
 
         [Fact]
         public async Task Test_Create_And_Delete_Computer()
@@ -108,6 +114,9 @@ namespace TestBangazonAPI
             }
         }
 
+
+
+        //tests for a not found if the computer does not exist in the database if user is trying to delete
         [Fact]
         public async Task Test_Delete_NonExistent_Computer_Fails()
         {
@@ -120,6 +129,7 @@ namespace TestBangazonAPI
             }
         }
 
+        //test that creates, modifies, and deletes a computer
         [Fact]
         public async Task Test_Create_Modify_And_Delete_Computer()
         {
