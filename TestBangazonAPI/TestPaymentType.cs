@@ -17,6 +17,7 @@ namespace TestBangazonAPI
 {
     public class TestPaymentType
     {
+        //Test get all PaymentTypes
         [Fact]
         public async Task Test_Get_All_Payment_Types()
         {

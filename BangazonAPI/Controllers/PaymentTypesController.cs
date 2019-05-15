@@ -132,7 +132,8 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        //// PUT takes Id of the PaymentType you want to edit as an argument
+        // PUT takes Id of the PaymentType you want to edit as first argument
+        //second argument is the modified PaymentType object you want to PUT
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] PaymentType paymentType)
         {
