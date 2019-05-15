@@ -37,7 +37,7 @@ namespace BangazonAPI.Controllers
         }
 
         // GET api/values
-        // this HTTP Request gets all Products while joinging Customer and ProductType so that you can
+        // this HTTP Request gets all Products while joining Customer and ProductType so that you can
         // see the customer who created said product and the producttype. 
         [HttpGet]
         public async Task<IActionResult> Get()
@@ -94,8 +94,9 @@ namespace BangazonAPI.Controllers
         }
 
          //GET api/values/5
-         //This HTTP request gets a single product by Id. An example url to pull back one product is
+         //This HTTP request gets a single product by the argument Id. An example url to pull back one product is
          // Http://localhost:5000/api/products/1
+         // 
         [HttpGet("{id}", Name = "GetProduct") ]
         public async Task<IActionResult> Get(int id)
         {
@@ -178,7 +179,7 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        //This Http request allows you to edit an existing product.
+        //This Http request allows you to edit an existing product. It takes the argument for a single Id.
         [HttpPut("{id}")]
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Product product)
         {
@@ -227,7 +228,7 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        //This Http request allows you to delete a specific product from the database.
+        //This Http request allows you to delete a specific product from the database. It takes the argument of a single Id.
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
