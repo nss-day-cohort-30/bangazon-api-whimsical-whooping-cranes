@@ -181,7 +181,7 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        // DELETE takes Id of the PamentType you want to delete as an argument
+        // DELETE takes Id of the PaymentType you want to delete as an argument
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
