@@ -80,19 +80,14 @@ namespace BangazonAPI.Controllers
                 {
                     cmd.CommandText = $@"SELECT c.Id, c.FirstName, c.LastName, p.Title
                     FROM Customer c 
-                    JOIN Product p ON p.CustomerId = c.Id
-                    WHERE @Id = id";
+                    JOIN Products p ON p.CustomerId = c.Id
+                    WHERE @Id = c.id";
 
                     cmd.Parameters.Add(new SqlParameter("@id", id));
 
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
-                    if (pq != null)
-                    {
-                        sql = $"{cmd.Parameters} AND p.CustomerId = c.Id";
-                    }
-
-                    //if(pd is = "?_include = products")
+                                      //if(pd is = "?_include = products")
                     //{
                     //    Sql = $"{sql} AND c.Id = p.CustomerId"
                     //}
