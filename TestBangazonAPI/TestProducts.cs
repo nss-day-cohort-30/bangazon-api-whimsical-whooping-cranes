@@ -12,6 +12,10 @@ namespace TestBangazonAPI
 {
     public class TestProducts
     {
+        //Purpose: Test class for Product Controller
+        //Author: Katerina Freeman
+        //Methods: Testing get all products, get single product,
+        //create edit and delete product, delete nonexistent product, and get noneistent product. 
 
         //This Test will check if the Get all products Http request is working. 
         //If it fails, go to the ProductsController to make sure it is still functioning properly. 

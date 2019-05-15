@@ -11,6 +11,12 @@ using Microsoft.Extensions.Configuration;
 
 namespace BangazonAPI.Controllers
 {
+    //Purpose: Product Controller
+    //Author: Katerina Freeman
+    //Methods: Get all products, get single product, post new product, edit existing product, 
+    //delete existing product, and check if product exists. 
+
+
     [Route("api/[controller]")]
     [ApiController]
     public class ProductsController : ControllerBase
