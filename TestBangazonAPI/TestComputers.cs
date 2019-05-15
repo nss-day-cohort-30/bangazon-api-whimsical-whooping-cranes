@@ -12,6 +12,13 @@ namespace TestBangazonAPI
 {
     public class TestComputers
     {
+
+        Computer macbookSuperPro = new Computer
+        {
+            Make = "MacBook Super Pro",
+            Manufacturer = "Apple",
+            PurchaseDate = DateTime.Now,
+        };
         [Fact]
         public async Task Test_Get_All_Computers()
         {
@@ -117,41 +124,32 @@ namespace TestBangazonAPI
         public async Task Test_Create_Modify_And_Delete_Computer()
         {
 
-
             using (var client = new APIClientProvider().Client)
             {
-
                 DateTime purchasedate = DateTime.Now;
 
                 DateTime decomissiondate = DateTime.Now;
 
-                Computer test = new Computer
+                Computer macbookSuperPro = new Computer
                 {
-                  Make = "test",
-                  Manufacturer = "test",
-                  PurchaseDate = purchasedate,
-                  DecomissionDate = decomissiondate
+                    Make = "MacBook Super Pro",
+                    Manufacturer = "Apple",
+                    PurchaseDate = purchasedate,
+                    DecomissionDate = decomissiondate
                 };
-                var testAsJSON = JsonConvert.SerializeObject(test);
+
+                var macbookSuperProAsJSON = JsonConvert.SerializeObject(macbookSuperPro);
 
 
                 var response = await client.PostAsync(
                     "/computers",
-                    new StringContent(testAsJSON, Encoding.UTF8, "application/json")
+                    new StringContent(macbookSuperProAsJSON, Encoding.UTF8, "application/json")
                 );
 
                 response.EnsureSuccessStatusCode();
 
                 string responseBody = await response.Content.ReadAsStringAsync();
-                var newTest = JsonConvert.DeserializeObject<Computer>(responseBody);
-
-                Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-                Assert.Equal("test", newTest.Make);
-                Assert.Equal("test", newTest.Manufacturer);
-                Assert.Equal(purchasedate, newTest.PurchaseDate);
-                Assert.Equal(decomissiondate, newTest.DecomissionDate);
-                //////////////////////////////
-                ///
+                var newmacbookSuperPro = JsonConvert.DeserializeObject<Computer>(responseBody);
 
                 string newMake = "test number two";
 
@@ -160,19 +158,22 @@ namespace TestBangazonAPI
                 */
                 Computer modifiedComputer = new Computer
                 {
-                    Make = "test",
+                    Make = newMake,
                     Manufacturer = "test",
                     PurchaseDate = purchasedate,
                     DecomissionDate = decomissiondate
-     
+
                 };
                 var modifiedComputerAsJSON = JsonConvert.SerializeObject(modifiedComputer);
 
+                int modifiedNewComputerId = newmacbookSuperPro.Id;
+
                 var Modifyresponse = await client.PutAsync(
-                    $"/computers/{newTest.Id}",
+                    $"/computers/{modifiedNewComputerId}",
                     new StringContent(modifiedComputerAsJSON, Encoding.UTF8, "application/json")
                 );
-                response.EnsureSuccessStatusCode();
+
+                Modifyresponse.EnsureSuccessStatusCode();
                 string ModifyresponseBody = await Modifyresponse.Content.ReadAsStringAsync();
 
                 Assert.Equal(HttpStatusCode.NoContent, Modifyresponse.StatusCode);
@@ -180,7 +181,7 @@ namespace TestBangazonAPI
                 /*
                     GET section
                  */
-                var getComputer = await client.GetAsync($"/computers/{newTest.Id}");
+                var getComputer = await client.GetAsync($"/computers/{modifiedNewComputerId}");
                 getComputer.EnsureSuccessStatusCode();
 
                 string getComputerBody = await getComputer.Content.ReadAsStringAsync();
@@ -191,7 +192,7 @@ namespace TestBangazonAPI
 
 
                 //DELETE TEST
-                var deleteResponse = await client.DeleteAsync($"/computers/{newComputer.Id}");
+                var deleteResponse = await client.DeleteAsync($"/computers/{modifiedNewComputerId}");
                 deleteResponse.EnsureSuccessStatusCode();
                 Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
             }
