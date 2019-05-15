@@ -39,7 +39,7 @@ namespace BangazonAPI.Controllers
                         FROM Customer c 
                         JOIN Product p ON p.CustomerId = c.Id
                         WHERE 2=2";
-            if (pdq!= null)
+            if (pdq != null)
             {
                 sql = $@"SELECT c.Id, c.FirstName, c.LastName, p.Title
                         FROM Customer c
@@ -79,7 +79,7 @@ namespace BangazonAPI.Controllers
                                 ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
                                 Description= reader.GetString(reader.GetOrdinal("Description")),
                                 Quantity= reader.GetInt32(reader.GetOrdinal("Quantity")),
-                                   CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId"))
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId"))
                             });
 
                         }
@@ -96,42 +96,63 @@ namespace BangazonAPI.Controllers
         // GET api/values/5
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id, string pdq)
-
-            // add an IF not found error here
         {
-            using (SqlConnection conn = Connection)
+
+            string sql = @"SELECT
+                        c.Id, c.FirstName, c.LastName, p.Title, p.Id, p.ProductTypeId, p.Description, p.Quantity, p.CustomerId
+                        FROM Customer c 
+                        JOIN Product p ON p.CustomerId = c.Id
+                        WHERE 2=2";
+            if (pdq != null)
             {
-                conn.Open();
-                using (SqlCommand cmd = conn.CreateCommand())
-                    
+                sql = $@"SELECT c.Id, c.FirstName, c.LastName, p.Title
+                        FROM Customer c
+                        JOIN Product p ON p.CustomerId = c.Id";
+            }
+            // add an IF not found error here
+            {
+                using (SqlConnection conn = Connection)
                 {
-                    cmd.CommandText = $@"SELECT c.Id, c.FirstName, c.LastName, p.Title
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = sql;
+
+                        cmd.CommandText = $@"SELECT c.Id, c.FirstName, c.LastName, p.Title, p.Id, p.ProductTypeId, p.Description, p.Quantity, p.CustomerId
                     FROM Customer c 
                     JOIN Product p ON p.CustomerId = c.Id
                     WHERE @Id = c.id";
 
-                    cmd.Parameters.Add(new SqlParameter("@id", id));
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
 
-                    SqlDataReader reader = await cmd.ExecuteReaderAsync();
+                        SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
+                        Customer customer = null;
+                        List<Product> RelatedProducts = new List<Product>();
 
-                    Customer customer = null;
-                    List<Product> RelatedProducts = new List<Product>();
-
-                    if (reader.Read())
-                    {
-                        customer = new Customer
+                        if (reader.Read())
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                            customer = new Customer
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                            };
+                            customer.CustomerProducts.Add(new Product
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                Title = reader.GetString(reader.GetOrdinal("Title")),
+                                ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                                Description = reader.GetString(reader.GetOrdinal("Description")),
+                                Quantity = reader.GetInt32(reader.GetOrdinal("Quantity")),
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId"))
+                            });
+                        }
 
-                        };
+                        reader.Close();
+
+                        return Ok(customer);
                     }
-
-                    reader.Close();
-
-                    return Ok(customer);
                 }
             }
         }
