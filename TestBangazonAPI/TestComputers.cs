@@ -11,7 +11,8 @@ using System.Text;
 /*
     Purpose: Testing Class for Computer 
     Author: Abbey Brown
-    Methods: Testing Get All, Get Single, Post, Put and Delete methods
+    Methods: Testing Get All, Get Single, Post, Put and Delete methods and checks for non-existant computers for 
+    //get single and delete methods
 
  */
 namespace TestBangazonAPI
