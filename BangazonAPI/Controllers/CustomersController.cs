@@ -76,8 +76,16 @@ namespace BangazonAPI.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText =$@"SELECT Id, FirstName, LastName FROM Customer WHERE @Id = id";
+                    cmd.CommandText =$@"SELECT c.Id, c.FirstName, c.LastName
+                    FROM Customer c 
+                    Join Products p ON p.CustomerId = c.Id
+                    WHERE @Id = id";
                     cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                    //if(pd is = "?_include = products")
+                    //{
+                    //    Sql = $"{sql} AND c.Id = p.CustomerId"
+                    //}
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
                     Customer customer = null;
