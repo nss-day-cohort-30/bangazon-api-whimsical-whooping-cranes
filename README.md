@@ -39,6 +39,8 @@ Now it's time to build the controllers that handle GET, POST, PUT, and DELETE op
 ComputersController: Full CRUD, allows user to post, get(all and single), put (edit), and delete computers from the database.
 
 ProductsController: Full CRUD, allows users to post a new product, get all products, get a single product, delete a product, and edit an product form the database.
+
+PaymentTypeController: FULL CRUD, allows user to post, get all, get single, put, and delete PaymentTypes from the database
 ## Test Classes
 
 Each feature ticket your team will work on for this sprint has testing requirements. This boilerplate solution has a testing project includes with some starter code. You must make sure that all tests pass before you submit a PR.
@@ -46,3 +48,5 @@ Each feature ticket your team will work on for this sprint has testing requireme
 ComputersTestingClass: testing class that allows user to test methods for posting, getting(all and single), putting, and deleting computers from the database. Ensures ComputersController methods are functioning properly.
 
 TestingProductsClass: class that tests if the methods for getting all products, getting a single product, creating, editing, and deleting a product, deleting a non existing product, and getting a nonexistint product are functioning properly.
+
+PaymentTypeTestingClass: testing class that allows user to test methods for posting, getting all, getting single, posting, and delete PaymentType from database. Also contains method to test 'get single' for non existant PaymentType. 
