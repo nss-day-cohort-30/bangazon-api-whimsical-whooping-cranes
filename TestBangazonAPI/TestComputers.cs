@@ -9,7 +9,7 @@ using System.Net.Http;
 using System.Text;
 
 /*
-    Purpose: Controller for Computer Class
+    Purpose: Testing Class for Computer 
     Author: Abbey Brown
     Methods: Testing Get All, Get Single, Post, Put and Delete methods
 
