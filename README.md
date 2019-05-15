@@ -37,8 +37,12 @@ You will be using the [Official Bangazon SQL](./bangazon.sql) file to create you
 Now it's time to build the controllers that handle GET, POST, PUT, and DELETE operations on each resource. Make sure you read, and understand, the requirements in the issue tickets to you can use  SQL to return the correct data structure to client requests.
 
 ComputersController: Full CRUD, allows user to post, get(all and single), put (edit), and delete computers from the database.
+
+ProductsController: Full CRUD, allows users to post a new product, get all products, get a single product, delete a product, and edit an product form the database.
 ## Test Classes
 
 Each feature ticket your team will work on for this sprint has testing requirements. This boilerplate solution has a testing project includes with some starter code. You must make sure that all tests pass before you submit a PR.
 
 ComputersTestingClass: testing class that allows user to test methods for posting, getting(all and single), putting, and deleting computers from the database. Ensures ComputersController methods are functioning properly.
+
+TestingProductsClass: class that tests if the methods for getting all products, getting a single product, creating, editing, and deleting a product, deleting a non existing product, and getting a nonexistint product are functioning properly.
