@@ -8,6 +8,11 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 
+/*  Purpose: Test for PaymentTypes
+    Author: Mo Silvera
+    Methods: Test get single, get all, test post/put/delete, test get non existant
+  */
+
 namespace TestBangazonAPI
 {
     public class TestPaymentType
@@ -32,6 +37,8 @@ namespace TestBangazonAPI
 
             
         }
+        //Tests Get Single method on Payment Type controller
+        
         [Fact]
         public async Task Test_Get_Single_Payment_Type()
         {
@@ -53,11 +60,14 @@ namespace TestBangazonAPI
             }
         }
 
+        //Tests Post, Put, Delete Methods on Payment Type Controller
+
         [Fact]
-        public async Task Test_Create_And_Delete_Payment_Type()
+        public async Task Test_Create_And_Modify_And_Delete_Payment_Type()
         {
             using (var client = new APIClientProvider().Client)
             {
+                //POST
                 PaymentType testPaymentType = new PaymentType
                 {
                     AcctNumber = 1111,
@@ -83,6 +93,7 @@ namespace TestBangazonAPI
                 Assert.Equal("Test Payment Name", newTestPaymentType.Name);
                 Assert.Equal(1, newTestPaymentType.CustomerId);
 
+                //PUT
                 int newAcctNumber = 1234567;
 
                 PaymentType modifiedPaymentType = new PaymentType
@@ -111,6 +122,7 @@ namespace TestBangazonAPI
                 Assert.Equal(HttpStatusCode.OK, getPaymentType.StatusCode);
                 Assert.Equal(newAcctNumber, newPaymentType.AcctNumber);
 
+                //DELETE 
                 var deleteResponse = await client.DeleteAsync($"api/PaymentTypes/{newTestPaymentType.Id}");
                 deleteResponse.EnsureSuccessStatusCode();
                 Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
@@ -119,7 +131,7 @@ namespace TestBangazonAPI
 
         
     
-
+    //Tests 404 response received when asking for non-existant payment type
     [Fact]
         public async Task Test_Get_NonExistant_Payment_Type_Fails()
         {
