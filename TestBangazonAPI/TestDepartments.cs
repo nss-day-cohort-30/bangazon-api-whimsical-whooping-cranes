@@ -34,8 +34,8 @@ namespace TestBangazonAPI
         }
 
 
-        //This Test checks if the Http request to get a single product is successful.
-        //If it fails, go to the ProductsController to see if the get single product request is still functioning properly.
+        //This Test checks if the Http request to get a single department is successful.
+        //If it fails, go to the DepartmentsController to see if the get single department request is still functioning properly.
         [Fact]
         public async Task Test_Get_Single_Department()
         {
@@ -57,12 +57,11 @@ namespace TestBangazonAPI
         }
 
 
-        //This test checks three Http requests at once. It tests Post(creating) a new product Http request first. 
-        //It then tests the Put(edit) Http request using the product it just created. Finally it checks the delete
-        // Http request to delete a product by deleting the new product we just modified. If it fails, go to the 
-        //Products controller and depending on the error, check the Post, Put, or Delete Http requests.
+        //This test checks two Http requests at once. It tests Post(creating) a new department Http request first. 
+        //It then tests the Put(edit) Http request using the epartment it just created. If it fails, go to the 
+        //Departments controller and depending on the error, check the Post or Put Http requests.
         [Fact]
-        public async Task Test_Create_Modify_And_Delete_department()
+        public async Task Test_Create_Modify_department()
         {
             using (var client = new APIClientProvider().Client)
             {
@@ -90,20 +89,55 @@ namespace TestBangazonAPI
                 Assert.Equal("test", newTest.Name);
                 Assert.Equal(321, newTest.Budget);
 
-                
-               
+                //////////////////////////////
+                ///
+
+                string newName = "testNEW";
+
+                /*
+                   PUT section
+                */
+                Department newNameTest = new Department
+                {
+                    Name = "testNEW",
+                    Budget = 321
+                };
+                var modifiedDepartmentAsJSON = JsonConvert.SerializeObject(newNameTest);
+
+                var Modifyresponse = await client.PutAsync(
+                    $"/api/departments/{newTest.Id}",
+                    new StringContent(modifiedDepartmentAsJSON, Encoding.UTF8, "application/json")
+                );
+                response.EnsureSuccessStatusCode();
+                string ModifyresponseBody = await Modifyresponse.Content.ReadAsStringAsync();
+
+                Assert.Equal(HttpStatusCode.NoContent, Modifyresponse.StatusCode);
+
+                /*
+                    GET section
+                 */
+                var getDepartment = await client.GetAsync($"/api/departments/{newTest.Id}");
+                getDepartment.EnsureSuccessStatusCode();
+
+                string getDepartmentBody = await getDepartment.Content.ReadAsStringAsync();
+                Department newDepartment = JsonConvert.DeserializeObject<Department>(getDepartmentBody);
+
+                Assert.Equal(HttpStatusCode.OK, getDepartment.StatusCode);
+                Assert.Equal(newName, newDepartment.Name);
+
+
                 //DELETE TEST
-               // var deleteResponse = await client.DeleteAsync($"/api/departments/{newTest.Id}");
-               // deleteResponse.EnsureSuccessStatusCode();
-               // Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
+                // var deleteResponse = await client.DeleteAsync($"/api/departments/{newTest.Id}");
+                // deleteResponse.EnsureSuccessStatusCode();
+                // Assert.Equal(HttpStatusCode.NoContent, deleteResponse.StatusCode);
             }
         }
 
 
         
 
-        //This test checks if the Get a nonexistent product will get a product that doesn't exist. If it
-        //fails go the the get Single Products Http request in ProductsController andmake sure it is still
+        //This test checks if the Get a nonexistent department will get a department that doesn't exist. If it
+        //fails go the the get Single Departments Http request in the DepartmentsController and make sure it is still
         //functioning properly.
 
         [Fact]

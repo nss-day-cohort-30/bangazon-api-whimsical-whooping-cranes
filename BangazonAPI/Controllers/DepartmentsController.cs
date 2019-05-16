@@ -10,6 +10,13 @@ using Microsoft.Extensions.Configuration;
 
 namespace BangazonAPI.Controllers
 {
+    //Purpose: Department Controller
+    //Author: Katerina Freeman
+    //Methods: Get all departments, query for all departments to include employees of that department, 
+    //query to see departments that budget is greater than or equal to 300000, get single department, 
+    //post new department, edit existing department, 
+    // and check if product exists. 
+
     [Route("api/[controller]")]
     [ApiController]
     public class DepartmentsController : Controller
@@ -29,6 +36,12 @@ namespace BangazonAPI.Controllers
             }
         }
 
+
+        // this HTTP Request gets all Departments. It also allows users to query for all departments to include employees of that department and
+        //to query to see departments that budget is greater than or equal to 300000
+        // ex:  Http://localhost:5000/api/departments
+        //      Http://localhost:5000/api/departments?_include=employees
+        //      Http://localhost:5000/api/departments?_filter=budget&_gt=300000
         [HttpGet]
         public async Task<IActionResult> GetAllDepartments(int? _gt, string _include, string _filter)
         {
@@ -94,6 +107,10 @@ namespace BangazonAPI.Controllers
             }
         }
 
+        //This HTTP request gets a single department by the argument Id.An example url to pull back one product is
+         // Http://localhost:5000/api/departments/1
+         //
+
         [HttpGet("{id}", Name = "GetDepartment")]
         public async Task<IActionResult> Get(int id)
         {
@@ -133,7 +150,7 @@ namespace BangazonAPI.Controllers
         }
 
 
-        // This Http request allows you to create a new product
+        // This Http request allows you to create a new department
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Department department)
         {
@@ -153,6 +170,10 @@ namespace BangazonAPI.Controllers
                 }
             }
         }
+
+        //This Http request allows you to delete a specific product from the database. 
+        //It takes the argument of a single Id.
+
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Department department)
@@ -198,6 +219,7 @@ namespace BangazonAPI.Controllers
 
 
 
+        // This function checks if a department exists in the database by checking against it's Id. 
 
         private bool DepartmentExists(int id)
         {
