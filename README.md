@@ -1,6 +1,25 @@
 # Building the Bangazon Platform API
 
-Welcome, new Bangazonians!
+
+Hello, new users! Wlcome to Bangazon Platform API.
+This API displays the inner workings of Bangazon, a customer driven application to sell products.
+
+Set Up:
+
+You will need a Windows machine or a virtual Windows Machine to run this API.
+You will need Visual Studio 2019 (to review the code)
+You will need Azure Data Studio to create your Bangazon database
+You will need PostMan to query and view the Bangazon API
+
+1. git clone git@github.com:nss-day-cohort-30/bangazon-api-whimsical-whooping-cranes.git
+2. cd into bangazon-api-whimsical-whooping-cranes
+3. Start BangazonAPI.sln (this will open up your visual studio to review the code)
+4. Open Azure data studio, copy and paste the first part of the script below.
+5. Change your Bangazon server connection to Bangazon
+6. Copy and paste the second part of the script below (this will create the tables and insert values into the tables)
+7. From this point on, you will copy and paste the delete tables and drop table constraints so your tables are recreated each time you      restart your Azure.
+8. Run BangazonAPI within Visual Studio (in your terminal, you will see that your local host is port 5000
+9. Open up Postman, your Postman query will be for the post listed above. Here is an example of looking up employees        http://localhost:5000/employees
 
 Your job is to build out a .NET Web API that makes each resource in the Bangazon ERD available to application developers throughout the entire company.
 
@@ -14,19 +33,6 @@ Your job is to build out a .NET Web API that makes each resource in the Bangazon
 8. Training programs
 9. Departments
 
-> **Pro tip:** You do not need to make a Controller for the join tables, because those aren't resources.
-
-Your product owner will provide you with a prioritized backlog of features for you to work on over the development sprint. The first version of the API will be completely open since we have not determined which authentication method we want to use yet.
-
-The only restriction on the API is that only requests from the `www.bangazon.com` domain should be allowed. Requests from that domain should be able to access every resource, and perform any operation a resource.
-
-## Plan
-
-First, you need to plan. Your team needs to come to a consensus about the Bangazon ERD design. Once you feel you have consensus, you must get it approved by your manager before you begin writing code for the API.
-
-## Modeling
-
-Next, you need to author the Models needed for your API. Make sure that each model has the approprate foreign key relationship defined on it, either with a custom type or an `List<T>` to store many related things. The boilerplate code shows you one example - the relationship between `Order` and `OrderProduct`, which is 1 -> &#8734;. For every _OrderId_, it can be stored in the `OrderProduct` table many times.
 
 ## Database Management
 
@@ -34,18 +40,18 @@ You will be using the [Official Bangazon SQL](./bangazon.sql) file to create you
 
 ## Controllers
 
-Now it's time to build the controllers that handle GET, POST, PUT, and DELETE operations on each resource. Make sure you read, and understand, the requirements in the issue tickets to you can use  SQL to return the correct data structure to client requests.
 
 ComputersController: Full CRUD, allows user to post, get(all and single), put (edit), and delete computers from the database.
 
 ProductsController: Full CRUD, allows users to post a new product, get all products, get a single product, delete a product, and edit an product form the database.
-## Test Classes
+na
+PaymentTypeController: FULL CRUD, allows user to post, get all, get single, put, and delete PaymentTypes from the database
 
-Each feature ticket your team will work on for this sprint has testing requirements. This boilerplate solution has a testing project includes with some starter code. You must make sure that all tests pass before you submit a PR.
+## Test Classes
 
 ComputersTestingClass: testing class that allows user to test methods for posting, getting(all and single), putting, and deleting computers from the database. Ensures ComputersController methods are functioning properly.
 
 TestingProductsClass: class that tests if the methods for getting all products, getting a single product, creating, editing, and deleting a product, deleting a non existing product, and getting a nonexistint product are functioning properly.
 
 ## Customers:
- 
+
