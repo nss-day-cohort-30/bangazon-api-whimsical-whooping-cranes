@@ -5,14 +5,14 @@ Welcome, new Bangazonians!
 Your job is to build out a .NET Web API that makes each resource in the Bangazon ERD available to application developers throughout the entire company.
 
 1. Products
-1. Product types
-1. Customers
-1. Orders
-1. Payment types
-1. Employees
-1. Computers
-1. Training programs
-1. Departments
+2. Product types
+3. Customers
+4. Orders
+5. Payment types
+6. Employees
+7. Computers
+8. Training programs
+9. Departments
 
 > **Pro tip:** You do not need to make a Controller for the join tables, because those aren't resources.
 
@@ -46,3 +46,6 @@ Each feature ticket your team will work on for this sprint has testing requireme
 ComputersTestingClass: testing class that allows user to test methods for posting, getting(all and single), putting, and deleting computers from the database. Ensures ComputersController methods are functioning properly.
 
 TestingProductsClass: class that tests if the methods for getting all products, getting a single product, creating, editing, and deleting a product, deleting a non existing product, and getting a nonexistint product are functioning properly.
+
+## Customers:
+ 

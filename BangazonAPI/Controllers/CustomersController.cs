@@ -32,7 +32,7 @@ namespace BangazonAPI.Controllers
 
         // GET api/values
         [HttpGet]
-        public async Task<IActionResult> GetCustomers(string pdq)
+        public async Task<IActionResult> GetCustomers(string _include)
         {
             //This includes related products in the response
             string sql = @"SELECT
@@ -41,67 +41,72 @@ namespace BangazonAPI.Controllers
                         WHERE 2=2";
 
             //this will neglect related product list
-            if (pdq != null)
+            if (_include == "products")
             {
-                sql = $@"SELECT c.Id, c.FirstName, c.LastName, p.Title
+                sql = $@"SELECT c.Id, c.FirstName, c.LastName, p.Title, p.Quantity, p.CustomerId, p.Id, p.ProductTypeId, p.Description, p.CustomerId
                         FROM Customer c
                         left JOIN Product p ON c.Id = p.CustomerId";
             }
-            {
-                sql = $@"SELECT c.Id, c.FirstName, c.LastName
-                        FROM Customer c";
-            }
-
-
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = sql;
-                    if (pdq != null)
-                    {
-                        cmd.Parameters.Add(new SqlParameter("@p.Id", pdq));
-                    }
+
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
                     Dictionary<int, Customer> customerHashForProductsListed = new Dictionary<int, Customer>();
                     while (reader.Read())
                     {
                         int customerId = reader.GetInt32(reader.GetOrdinal("Id"));
+                        //int productCustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId"));
+               
+                            if (!customerHashForProductsListed.ContainsKey(customerId) && _include == "products") 
+                            {
+                                customerHashForProductsListed[customerId] = new Customer
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                    FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                    LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                };
+                            if (!reader.IsDBNull(reader.GetOrdinal("Title")))
+                            {
 
-                        if (!customerHashForProductsListed.ContainsKey(customerId))
-                        {
-                            customerHashForProductsListed[customerId] = new Customer
+                                customerHashForProductsListed[customerId].CustomerProducts.Add(new Product
+                                    {
+                                        Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                        Title = reader.GetString(reader.GetOrdinal("Title")),
+                                        ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                                        Description = reader.GetString(reader.GetOrdinal("Description")),
+                                        Quantity = reader.GetInt32(reader.GetOrdinal("Quantity")),
+                                        //CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId"))
+                                    });
+                            }
+                            }
+                            else
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                            };
-                          
-                            customerHashForProductsListed[customerId].CustomerProducts.Add(new Product
-                            {
-                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                                Title = reader.GetString(reader.GetOrdinal("Title")),
-                                ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
-                                Description = reader.GetString(reader.GetOrdinal("Description")),
-                                Quantity = reader.GetInt32(reader.GetOrdinal("Quantity")),
-                                CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId"))
-                            });
-                        }
+                                  customerHashForProductsListed[customerId] = new Customer
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                    FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                    LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                };
+                            }
+                        
+                     }
+
+                            List<Customer> customers = customerHashForProductsListed.Values.ToList();
+                            reader.Close();
+
+                            return Ok(customers);
+                       
                     }
-
-                    List<Customer> customers = customerHashForProductsListed.Values.ToList();
-                    reader.Close();
-
-                    return Ok(customers);
                 }
             }
-        }
-
         // GET specific customer information
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id, string pdq)
+        public async Task<IActionResult> Get(int id, string _include)
         {
             if (!CustomerExists(id))
             {
@@ -109,18 +114,6 @@ namespace BangazonAPI.Controllers
             }
 
             //This will get specific customer info AND related products if additional argument is passed in w/ the customer id.
-            string sql = @"SELECT
-                        c.Id, c.FirstName, c.LastName
-                        FROM Customer c
-                        WHERE 2=2";
-
-            if (pdq != null)
-            {
-                sql = $@"SELECT c.Id, c.FirstName, c.LastName, p.Title
-                        FROM Customer c
-                         left JOIN Product p ON c.Id = p.CustomerId";
-            }
-
 
             // add an IF not found error here
             {
@@ -129,12 +122,23 @@ namespace BangazonAPI.Controllers
                     conn.Open();
                     using (SqlCommand cmd = conn.CreateCommand())
                     {
-                        cmd.CommandText = sql;
 
-                        cmd.CommandText = $@"SELECT c.Id, c.FirstName, c.LastName, p.Title, p.Id, p.ProductTypeId, p.Description, p.Quantity, p.CustomerId
+                        if (_include == "products")
+                        {
+                            string sql = $@"SELECT c.Id, c.FirstName, c.LastName, p.Title, p.Id, p.ProductTypeId, p.Description, p.Quantity, p.CustomerId
                     FROM Customer c 
                     left JOIN Product p ON p.CustomerId = c.Id
                     WHERE @Id = c.id";
+                        cmd.CommandText = sql;
+                        }
+                        else
+                        {
+                            string sql =$@"SELECT
+                        c.Id, c.FirstName, c.LastName
+                        FROM Customer c
+                        WHERE 2=2";
+                        }
+                        //cmd.CommandText = sql;
 
                         cmd.Parameters.Add(new SqlParameter("@id", id));
 
@@ -151,19 +155,18 @@ namespace BangazonAPI.Controllers
                                 LastName = reader.GetString(reader.GetOrdinal("LastName")),
                             };
                             if (!reader.IsDBNull(reader.GetOrdinal("Title")))
-                            {
 
-                            customer.CustomerProducts.Add(new Product
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                                Title = reader.GetString(reader.GetOrdinal("Title")),
-                                ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
-                                Description = reader.GetString(reader.GetOrdinal("Description")),
-                                Quantity = reader.GetInt32(reader.GetOrdinal("Quantity")),
-                                CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId"))
-                            });
+                                customer.CustomerProducts.Add(new Product
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                    Title = reader.GetString(reader.GetOrdinal("Title")),
+                                    ProductTypeId = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                                    Description = reader.GetString(reader.GetOrdinal("Description")),
+                                    Quantity = reader.GetInt32(reader.GetOrdinal("Quantity")),
+                                    CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId"))
+                                });
                             }
-
                         }
 
 
