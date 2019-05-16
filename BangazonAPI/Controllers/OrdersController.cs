@@ -48,19 +48,22 @@ namespace BangazonAPI.Controllers
                     if (completed == null)
                     {
                         cmd.CommandText = @"SELECT
-                    o.Id, o.PaymentTypeId,
-                    op.ProductId,
-                    p.CustomerId, p.Price, p.Title, p.Description, p.ProductTypeId, p.Quantity,
-                    pt.Name
-                    FROM [Order] o
-                    JOIN OrderProduct op ON op.OrderId = o.Id
-                    JOIN Product p ON op.ProductId = p.Id
-                    JOIN ProductType pt ON p.ProductTypeId = pt.Id;";
+                            o.Id, o.PaymentTypeId,
+                            op.ProductId,
+                            p.CustomerId, p.Price, p.Title, p.Description, p.ProductTypeId, p.Quantity,
+                            pt.Name
+                            FROM [Order] o
+                            JOIN OrderProduct op ON op.OrderId = o.Id
+                            JOIN Product p ON op.ProductId = p.Id
+                            JOIN ProductType pt ON p.ProductTypeId = pt.Id;";
 
                         SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
                         Dictionary<int, Order> orderHash = new Dictionary<int, Order>();
 
+                        int? paymentTypeId = null; 
+                        if (paymentTypeId != null) { paymentTypeId = reader.GetInt32(reader.GetOrdinal("PaymentTypeId")); };
+                      
                         while (reader.Read())
                         {
                             int orderId = reader.GetInt32(reader.GetOrdinal("Id"));
@@ -71,7 +74,7 @@ namespace BangazonAPI.Controllers
                                 {
                                     Id = reader.GetInt32(reader.GetOrdinal("Id")),
                                     CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
-                                    PaymentTypeId = reader.GetInt32(reader.GetOrdinal("PaymentTypeId"))
+                                    PaymentTypeId = paymentTypeId
                                 };
                             }
 
@@ -297,10 +300,9 @@ namespace BangazonAPI.Controllers
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = @"INSERT INTO [Order] (CustomerId, PaymentTypeId)
+                    cmd.CommandText = @"INSERT INTO [Order] (CustomerId)
                                         OUTPUT INSERTED.Id
-                                        VALUES (@CustomerId, @PaymentTypeId)";
-                    cmd.Parameters.Add(new SqlParameter("@PaymentTypeId", order.PaymentTypeId));
+                                        VALUES (@CustomerId)";
                     cmd.Parameters.Add(new SqlParameter("@CustomerId", order.CustomerId));
 
 
@@ -327,7 +329,7 @@ namespace BangazonAPI.Controllers
                             UPDATE [Order]
                             SET CustomerId = @CustomerId,
                             PaymentTypeId = @PaymentTypeId,
-                            WHERE Id = @id
+                            WHERE Id = @id;
                         ";
                         cmd.Parameters.Add(new SqlParameter("@CustomerId", order.CustomerId));
                         cmd.Parameters.Add(new SqlParameter("@PaymentTypeId", order.PaymentTypeId));
