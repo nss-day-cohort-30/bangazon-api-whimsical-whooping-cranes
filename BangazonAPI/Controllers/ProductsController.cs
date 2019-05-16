@@ -228,7 +228,8 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        //This Http request allows you to delete a specific product from the database. It takes the argument of a single Id.
+        //This Http request allows you to delete a specific product from the database. 
+        //It takes the argument of a single Id.
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {

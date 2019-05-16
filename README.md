@@ -47,6 +47,8 @@ ProductsController: Full CRUD, allows users to post a new product, get all produ
 na
 PaymentTypeController: FULL CRUD, allows user to post, get all, get single, put, and delete PaymentTypes from the database
 
+DepartmentController:  Get all departments, query for all departments to include employees of that department, query to see departments that budget is greater than or equal to 300000, get single department, post new department, edit existing department, and check if product exists.  
+
 ## Test Classes
 
 ComputersTestingClass: testing class that allows user to test methods for posting, getting(all and single), putting, and deleting computers from the database. Ensures ComputersController methods are functioning properly.
@@ -55,6 +57,7 @@ TestingProductsClass: class that tests if the methods for getting all products, 
 
 PaymentTypeTestingClass: testing class that allows user to test methods for posting, getting all, getting single, posting, and delete PaymentType from database. Also contains method to test 'get single' for non existant PaymentType. 
 
+DepartmentTestingClass: testing class that allows user to test the get all departments method, modify a department method, post a department method, and get a nonexistant department method.
 
 CODE TO COPY AND PASTE INTO AZURE TO CREATE BANGAZON API
 
