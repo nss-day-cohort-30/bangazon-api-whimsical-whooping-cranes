@@ -30,15 +30,20 @@ namespace BangazonAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllDepartments(string _include)
+        public async Task<IActionResult> GetAllDepartments(int? _gt, string _include, string _filter)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    
-
+                    if (_filter == "budget" && _gt == 300000)
+                    {
+                        cmd.CommandText = $@"SELECT Id, Budget, Name 
+                                            FROM Department 
+                                            WHERE Budget >= 300000
+                                            ";
+                    }
                     if (_include == "employees")
                     {
                         cmd.CommandText = $@"SELECT
@@ -46,7 +51,7 @@ namespace BangazonAPI.Controllers
                     FROM Employee e
                     JOIN Department d ON e.DepartmentId = d.Id";
                     }
-                    else
+                    if(_gt == null && _filter == null && _include == null)
                     {
                         cmd.CommandText = @"SELECT Id, Name, Budget FROM Department";
                     }
@@ -77,6 +82,7 @@ namespace BangazonAPI.Controllers
 
                                 department.employees.Add(employee);
                             }
+
                             departments.Add(department);
                         }
                     }
@@ -144,6 +150,48 @@ namespace BangazonAPI.Controllers
                     int newId = (int)cmd.ExecuteScalar();
                     department.Id = newId;
                     return CreatedAtRoute("GetProduct", new { id = newId }, department);
+                }
+            }
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Put([FromRoute] int id, [FromBody] Department department)
+        {
+            try
+            {
+                using (SqlConnection conn = Connection)
+                {
+                    conn.Open();
+                    using (SqlCommand cmd = conn.CreateCommand())
+                    {
+                        cmd.CommandText = @"UPDATE Department
+                                            SET Name = @Name,
+                                            Budget = @Budget
+                                               
+                                            WHERE Id = @id";
+                        cmd.Parameters.Add(new SqlParameter("@Name", department.Name));
+                        cmd.Parameters.Add(new SqlParameter("@Budget", department.Budget));
+                        
+                        cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                        int rowsAffected = cmd.ExecuteNonQuery();
+                        if (rowsAffected > 0)
+                        {
+                            return new StatusCodeResult(StatusCodes.Status204NoContent);
+                        }
+                        throw new Exception("No rows affected");
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                if (!DepartmentExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
                 }
             }
         }
