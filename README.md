@@ -42,6 +42,8 @@ You will be using the [Official Bangazon SQL](./bangazon.sql) file to create you
 
 ComputersController: Full CRUD, allows user to post, get(all and single), put (edit), and delete computers from the database.
 
+CustomerController: Get allows users to get all customers. Include "?_include=products" with fetch call to get products customer is selling.
+
 ProductsController: Full CRUD, allows users to post a new product, get all products, get a single product, delete a product, and edit an product form the database.
 na
 PaymentTypeController: FULL CRUD, allows user to post, get all, get single, put, and delete PaymentTypes from the database
@@ -49,6 +51,8 @@ PaymentTypeController: FULL CRUD, allows user to post, get all, get single, put,
 ## Test Classes
 
 ComputersTestingClass: testing class that allows user to test methods for posting, getting(all and single), putting, and deleting computers from the database. Ensures ComputersController methods are functioning properly.
+
+CustomersTestingClass: allows user to test methods for getting customers.
 
 TestingProductsClass: class that tests if the methods for getting all products, getting a single product, creating, editing, and deleting a product, deleting a non existing product, and getting a nonexistint product are functioning properly.
 
