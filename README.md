@@ -17,7 +17,7 @@ You will need PostMan to query and view the Bangazon API
 4. Open Azure data studio, copy and paste the first part of the script below.
 5. Change your Bangazon server connection to Bangazon
 6. Copy and paste the second part of the script below (this will create the tables and insert values into the tables)
-7. From this point on, you will copy and paste the delete tables and drop table constraints so your tables are recreated each time you      restart your Azure.
+7. From this point on, you will copy and paste the delete tables and drop table constraints so your tables are recreated each time you restart your Azure.
 8. Run BangazonAPI within Visual Studio (in your terminal, you will see that your local host is port 5000
 9. Open up Postman, your Postman query will be for the post listed above. Here is an example of looking up employees        http://localhost:5000/employees
 
@@ -39,7 +39,6 @@ Your job is to build out a .NET Web API that makes each resource in the Bangazon
 You will be using the [Official Bangazon SQL](./bangazon.sql) file to create your database. Create the database using SSMS, create a new SQL script for that database, copy the contents of the SQL file into your script, and then execute it.
 
 ## Controllers
-
 
 ComputersController: Full CRUD, allows user to post, get(all and single), put (edit), and delete computers from the database.
 
