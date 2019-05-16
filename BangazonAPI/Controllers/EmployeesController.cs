@@ -39,121 +39,102 @@ namespace BangazonAPI.Controllers
             }
         }
 
-        //allows user to get all the computers from the database
+        //allows user to get all the computers from the database with their department and computer
 
         [HttpGet]
-        public async Task<IActionResult> GetEmployees()
+        public async Task<IActionResult> Get()
         {
-            string sql = @"SELECT
-                            e.Id, e.FirstName, e.LastName, e.DepartmentId, e.IsSuperVisor, 
-                            d.Id, d.Name DepartmentName, d.Budget
-                            FROM Employee e
-                            JOIN Department d ON e.DepartmentId = d.Id
-                        ";
-
-            
-
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = sql;
-
+                    cmd.CommandText = $@"SELECT * FROM Employee e 
+                                            LEFT JOIN Department d ON e.DepartmentId = d.id 
+                                            LEFT JOIN ComputerEmployee ce ON e.id = ce.EmployeeId 
+                                            LEFT JOIN Computer c ON ce.ComputerId = c.Id";
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
                     List<Employee> employees = new List<Employee>();
-
                     while (reader.Read())
                     {
-                   
-
-                        Employee employee = new Employee
+                        //if the ComputerEmployee joining table does not include EmployeeId then don't create the computer object instance
+                        //just list the department because every employee is assigned to a department, but right now Katerina in the database in not yet assigned a computer 
+                        if (reader.IsDBNull(reader.GetOrdinal("EmployeeId")))
                         {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
-                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                            IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor")),
-                            department = new Department
+                            Employee employee = new Employee
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
-                                Name = reader.GetString(reader.GetOrdinal("DepartmentName")),
-                                Budget = reader.GetInt32(reader.GetOrdinal("Budget")),
+                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                                IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor")),
+                                department = new Department
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                                    Name = reader.GetString(reader.GetOrdinal("Name")),
+                                    Budget = reader.GetInt32(reader.GetOrdinal("Budget"))
+                                }
+                            };
+                            employees.Add(employee);
+                        }
+                        else
+                        {
+                            if (reader.IsDBNull(reader.GetOrdinal("DecomissionDate")))
+                            {
+                                Employee employee = new Employee
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                    FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                    LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                    DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                                    IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor")),
+                                    department = new Department
+                                    {
+                                        Id = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                                        Name = reader.GetString(reader.GetOrdinal("Name")),
+                                        Budget = reader.GetInt32(reader.GetOrdinal("Budget"))
+                                    },
+                                    computer = new Computer
+                                    {
+                                        Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
+                                        PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
+                                        Make = reader.GetString(reader.GetOrdinal("Make")),
+                                        Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
+                                    }
+                                };
+                                employees.Add(employee);
                             }
-
-                        };
-
-                        employees.Add(employee);
+                            else
+                            {
+                                Employee employee = new Employee
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                    FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                    LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                    DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                                    IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor")),
+                                    department = new Department
+                                    {
+                                        Id = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                                        Name = reader.GetString(reader.GetOrdinal("Name")),
+                                        Budget = reader.GetInt32(reader.GetOrdinal("Budget"))
+                                    },
+                                    computer = new Computer
+                                    {
+                                        Id = reader.GetInt32(reader.GetOrdinal("ComputerId")),
+                                        PurchaseDate = reader.GetDateTime(reader.GetOrdinal("PurchaseDate")),
+                                        DecomissionDate = reader.GetDateTime(reader.GetOrdinal("DecomissionDate")),
+                                        Make = reader.GetString(reader.GetOrdinal("Make")),
+                                        Manufacturer = reader.GetString(reader.GetOrdinal("Manufacturer"))
+                                    }
+                                };
+                                employees.Add(employee);
+                            }
+                        }
                     }
                     reader.Close();
-
                     return Ok(employees);
-                }
-            }
-        }
-
-        //allows user to get single computer from the database
-        //accepts the specific employee id as an argument
-
-        [HttpGet("{id}", Name = "GetEmployee")]
-        public async Task<IActionResult> Get([FromRoute] int id)
-        {
-
-
-            string sql = @"SELECT
-                            e.Id, e.FirstName, e.LastName, e.DepartmentId, e.IsSuperVisor, 
-                            d.Id, d.Name DepartmentName, d.Budget
-                            FROM Employee e
-                            JOIN Department d ON e.DepartmentId = d.Id
-                        ";
-
-            if (!EmployeeExists(id))
-            {
-                return new StatusCodeResult(StatusCodes.Status404NotFound);
-            }
-
-            using (SqlConnection conn = Connection)
-            {
-                conn.Open();
-                using (SqlCommand cmd = conn.CreateCommand())
-                {
-                    cmd.CommandText = sql;
-                   
-                    
-
-                    cmd.Parameters.Add(new SqlParameter("@id", id));
-                    SqlDataReader reader = await cmd.ExecuteReaderAsync();
-
-                    
-
-                    if (reader.Read())
-                    {
-                       
-                     
-                              Employee employee = new Employee
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
-                            FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                            LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                            IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor")),
-                            department = new Department
-                            {
-                                Id = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
-                                Name = reader.GetString(reader.GetOrdinal("DepartmentName")),
-                                Budget = reader.GetInt32(reader.GetOrdinal("Budget")),
-                            }
-
-                        };
-
-          
-                        reader.Close();
-
-                        return Ok(employee);
-                    };
-
-                    return new StatusCodeResult(StatusCodes.Status404NotFound);
                 }
             }
         }

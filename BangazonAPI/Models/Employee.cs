@@ -14,7 +14,7 @@ namespace BangazonAPI.Models
         public bool IsSuperVisor { get; set; }
 
         public int DepartmentId { get; set; }
-        public List<Computer> ComputerHistory { get; set; }
+        public Computer computer { get; set; }
 
         public List<TrainingProgram> trainingPrograms { get; set; }
 
