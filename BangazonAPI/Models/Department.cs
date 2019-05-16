@@ -12,6 +12,7 @@ namespace BangazonAPI.Models
         public string Name { get; set; }
 
         public int Budget { get; set; }
-        public Employee Employee { get; internal set; }
+
+        public List<Employee> employees = new List<Employee>();
     }
 }

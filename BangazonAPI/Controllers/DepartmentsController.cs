@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using BangazonAPI.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
 namespace BangazonAPI.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class DepartmentsController : Controller
     {
         private readonly IConfiguration _config;
@@ -26,100 +30,142 @@ namespace BangazonAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllDepartments(string _includes )
+        public async Task<IActionResult> GetAllDepartments(string _include)
         {
-            string sql = @"SELECT d.Id, d.Name, d.Budget,
-                        e.Id, e.FirstName, e.LastName, e.DepartmentId
-                        FROM Department d
-                        JOIN Employee e ON e.DepartmentId = d.Id
-                        WHERE 2=2
-                        ";
-
-            if (_includes != null)
-            {
-                sql = $"{sql} AND e.Id = @employeeId";
-            }
-
-
-            //if (exercise != null)
-            //{
-            //    sql = $"{sql} AND e.Name LIKE @exerciseName";
-            //}
-
-            if (q != null)
-            {
-                sql = $@"{sql} AND (
-                    s.LastName LIKE @q
-                    OR s.FirstName LIKE @q
-                    OR s.SlackHandle LIKE @q
-                    )
-                    ";
-
-            }
-
-            if (orderBy != null)
-            {
-                sql = $"{sql} ORDER BY {orderBy}";
-            }
-
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandText = sql;
-                    if (cohort != null)
-                    {
-                        cmd.Parameters.Add(new SqlParameter("@cohortId", cohort));
-                    }
-                    if (q != null)
-                    {
-                        cmd.Parameters.Add(new SqlParameter("@q", $"%{q}%"));
+                    
 
-                    }
-                    if (exercise != null)
+                    if (_include == "employees")
                     {
-                        cmd.Parameters.Add(new SqlParameter("@exerciseName", $"%{exercise}%"));
+                        cmd.CommandText = $@"SELECT
+                    e.Id as EmployeeId, e.FirstName, e.LastName, e.DepartmentId, e.IsSuperVisor, d.Id, d.Name, d.Budget
+                    FROM Employee e
+                    JOIN Department d ON e.DepartmentId = d.Id";
                     }
-
+                    else
+                    {
+                        cmd.CommandText = @"SELECT Id, Name, Budget FROM Department";
+                    }
                     SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
-                    Dictionary<int, Student> studentHash = new Dictionary<int, Student>();
-
+                    List<Department> departments = new List<Department>();
                     while (reader.Read())
                     {
-                        int studentId = reader.GetInt32(reader.GetOrdinal("Id"));
-
-                        if (!studentHash.ContainsKey(studentId))
+                        if (departments.Count < reader.GetInt32(reader.GetOrdinal("Id")))
                         {
-                            studentHash[studentId] = new Student
+                            Department department = new Department
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                                CohortId = reader.GetInt32(reader.GetOrdinal("CohortId")),
-                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                                SlackHandle = reader.GetString(reader.GetOrdinal("SlackHandle")),
-                                Cohort = new Cohort
-                                {
-                                    Id = reader.GetInt32(reader.GetOrdinal("CohortId")),
-                                    Name = reader.GetString(reader.GetOrdinal("CohortName"))
-                                }
+                                Name = reader.GetString(reader.GetOrdinal("Name")),
+                                Budget = reader.GetInt32(reader.GetOrdinal("Budget")),
                             };
+
+                            if (_include == "employees")
+                            {
+                                Employee employee = new Employee
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("EmployeeId")),
+                                    FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                                    LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                                    DepartmentId = reader.GetInt32(reader.GetOrdinal("DepartmentId")),
+                                    IsSuperVisor = reader.GetBoolean(reader.GetOrdinal("IsSuperVisor"))
+                                };
+
+                                department.employees.Add(employee);
+                            }
+                            departments.Add(department);
                         }
-
-                        studentHash[studentId].AssignedExercises.Add(new Exercise
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("ExerciseId")),
-                            Name = reader.GetString(reader.GetOrdinal("Name")),
-                            Language = reader.GetString(reader.GetOrdinal("Language"))
-                        });
-
-
                     }
-                    List<Student> students = studentHash.Values.ToList();
+
                     reader.Close();
 
-                    return Ok(students);
+                    return Ok(departments);
+                }
+            }
+        }
+
+        [HttpGet("{id}", Name = "GetDepartment")]
+        public async Task<IActionResult> Get(int id)
+        {
+            if (!DepartmentExists(id))
+            {
+                return new StatusCodeResult(StatusCodes.Status404NotFound);
+            }
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"SELECT Id, Name, Budget
+                                            FROM Department
+                                           WHERE @id = Id";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+                    SqlDataReader reader = await cmd.ExecuteReaderAsync();
+
+                    Department department = null;
+                    if (reader.Read())
+                    {
+                       department = new Department
+                        {
+                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                            Budget = reader.GetInt32(reader.GetOrdinal("Budget")),
+                            Name = reader.GetString(reader.GetOrdinal("Name"))
+                        };
+
+                      };
+                    
+
+                    reader.Close();
+
+                    return Ok(department);
+                }
+            }
+        }
+
+
+        // This Http request allows you to create a new product
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] Department department)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"INSERT INTO Department(Name, Budget)
+                                        OUTPUT INSERTED.Id
+                                        VALUES (@Name, @Budget)";
+                    cmd.Parameters.Add(new SqlParameter("@Name", department.Name));
+                    cmd.Parameters.Add(new SqlParameter("@Budget", department.Budget));
+                    int newId = (int)cmd.ExecuteScalar();
+                    department.Id = newId;
+                    return CreatedAtRoute("GetProduct", new { id = newId }, department);
+                }
+            }
+        }
+
+
+
+
+        private bool DepartmentExists(int id)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                       SELECT Id, Name, Budget                                            
+                       FROM Department
+                       WHERE Id = @id";
+                    cmd.Parameters.Add(new SqlParameter("@id", id));
+
+                    SqlDataReader reader = cmd.ExecuteReader();
+                    return reader.Read();
                 }
             }
         }
