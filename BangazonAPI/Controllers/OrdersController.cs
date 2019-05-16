@@ -38,15 +38,16 @@ namespace BangazonAPI.Controllers
 
         // GET ALL
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get(string completed)
         {
             using (SqlConnection conn = Connection)
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
-
                 {
-                    cmd.CommandText = @"SELECT
+                    if (completed == null)
+                    {
+                        cmd.CommandText = @"SELECT
                     o.Id, o.PaymentTypeId,
                     op.ProductId,
                     p.CustomerId, p.Price, p.Title, p.Description, p.ProductTypeId, p.Quantity,
@@ -56,48 +57,161 @@ namespace BangazonAPI.Controllers
                     JOIN Product p ON op.ProductId = p.Id
                     JOIN ProductType pt ON p.ProductTypeId = pt.Id;";
 
-                    SqlDataReader reader = await cmd.ExecuteReaderAsync();
+                        SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
-                    Dictionary<int, Order> orderHash = new Dictionary<int, Order>();
+                        Dictionary<int, Order> orderHash = new Dictionary<int, Order>();
 
-                    while (reader.Read())
-                    {
-                        int orderId = reader.GetInt32(reader.GetOrdinal("Id"));
-
-                        if (!orderHash.ContainsKey(orderId))
+                        while (reader.Read())
                         {
-                            orderHash[orderId] = new Order
-                            {
-                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                                CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
-                                PaymentTypeId = reader.GetInt32(reader.GetOrdinal("PaymentTypeId"))
-                            };
-                        }
+                            int orderId = reader.GetInt32(reader.GetOrdinal("Id"));
 
-                        orderHash[orderId].productsInOrder = new List<Product>();
-
-                        orderHash[orderId].productsInOrder.Add(new Product
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
-                            CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
-                            Price = reader.GetDecimal(reader.GetOrdinal("Price")),
-                            Title = reader.GetString(reader.GetOrdinal("Title")),
-                            Description = reader.GetString(reader.GetOrdinal("Description")),
-                            Quantity = reader.GetInt32(reader.GetOrdinal("Quantity")),
-                            ProductType = new ProductType
+                            if (!orderHash.ContainsKey(orderId))
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
-                                Name = reader.GetString(reader.GetOrdinal("Name"))
+                                orderHash[orderId] = new Order
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                    CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                                    PaymentTypeId = reader.GetInt32(reader.GetOrdinal("PaymentTypeId"))
+                                };
                             }
-                        });
+
+                            orderHash[orderId].productsInOrder = new List<Product>();
+
+                            orderHash[orderId].productsInOrder.Add(new Product
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                                Price = reader.GetDecimal(reader.GetOrdinal("Price")),
+                                Title = reader.GetString(reader.GetOrdinal("Title")),
+                                Description = reader.GetString(reader.GetOrdinal("Description")),
+                                Quantity = reader.GetInt32(reader.GetOrdinal("Quantity")),
+                                ProductType = new ProductType
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                                    Name = reader.GetString(reader.GetOrdinal("Name"))
+                                }
+                            });
 
 
+                        }
+                        List<Order> orders = orderHash.Values.ToList();
+
+                        reader.Close();
+
+                        return Ok(orders);
                     }
-                    List<Order> orders = orderHash.Values.ToList();
+                    else if (completed == "true"){
+                        cmd.CommandText = @"SELECT
+                            o.Id, o.PaymentTypeId,
+                            op.ProductId,
+                            p.CustomerId, p.Price, p.Title, p.Description, p.ProductTypeId, p.Quantity,
+                            pt.Name
+                            FROM [Order] o
+                            JOIN OrderProduct op ON op.OrderId = o.Id
+                            JOIN Product p ON op.ProductId = p.Id
+                            JOIN ProductType pt ON p.ProductTypeId = pt.Id
+                            WHERE o.PaymentTypeId is NOT NULL;";
 
-                    reader.Close();
+                        SqlDataReader reader = await cmd.ExecuteReaderAsync();
 
-                    return Ok(orders);
+                        Dictionary<int, Order> orderHash = new Dictionary<int, Order>();
+
+                        while (reader.Read())
+                        {
+                            int orderId = reader.GetInt32(reader.GetOrdinal("Id"));
+
+                            if (!orderHash.ContainsKey(orderId))
+                            {
+                                orderHash[orderId] = new Order
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                    CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                                    PaymentTypeId = reader.GetInt32(reader.GetOrdinal("PaymentTypeId"))
+                                };
+                            }
+
+                            orderHash[orderId].productsInOrder = new List<Product>();
+
+                            orderHash[orderId].productsInOrder.Add(new Product
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                                Price = reader.GetDecimal(reader.GetOrdinal("Price")),
+                                Title = reader.GetString(reader.GetOrdinal("Title")),
+                                Description = reader.GetString(reader.GetOrdinal("Description")),
+                                Quantity = reader.GetInt32(reader.GetOrdinal("Quantity")),
+                                ProductType = new ProductType
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                                    Name = reader.GetString(reader.GetOrdinal("Name"))
+                                }
+                            });
+
+
+                        }
+                        List<Order> orders = orderHash.Values.ToList();
+
+                        reader.Close();
+
+                        return Ok(orders);
+                    }
+                    else if (completed == "false")
+                    {
+                        cmd.CommandText = @"SELECT
+                            o.Id, o.PaymentTypeId,
+                            op.ProductId,
+                            p.CustomerId, p.Price, p.Title, p.Description, p.ProductTypeId, p.Quantity,
+                            pt.Name
+                            FROM [Order] o
+                            JOIN OrderProduct op ON op.OrderId = o.Id
+                            JOIN Product p ON op.ProductId = p.Id
+                            JOIN ProductType pt ON p.ProductTypeId = pt.Id
+                            WHERE o.PaymentTypeId is NULL;";
+
+                        SqlDataReader reader = await cmd.ExecuteReaderAsync();
+
+                        Dictionary<int, Order> orderHash = new Dictionary<int, Order>();
+
+                        while (reader.Read())
+                        {
+                            int orderId = reader.GetInt32(reader.GetOrdinal("Id"));
+
+                            if (!orderHash.ContainsKey(orderId))
+                            {
+                                orderHash[orderId] = new Order
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                                    CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                                    PaymentTypeId = 0
+                                };
+                            }
+
+                            orderHash[orderId].productsInOrder = new List<Product>();
+
+                            orderHash[orderId].productsInOrder.Add(new Product
+                            {
+                                Id = reader.GetInt32(reader.GetOrdinal("ProductId")),
+                                CustomerId = reader.GetInt32(reader.GetOrdinal("CustomerId")),
+                                Price = reader.GetDecimal(reader.GetOrdinal("Price")),
+                                Title = reader.GetString(reader.GetOrdinal("Title")),
+                                Description = reader.GetString(reader.GetOrdinal("Description")),
+                                Quantity = reader.GetInt32(reader.GetOrdinal("Quantity")),
+                                ProductType = new ProductType
+                                {
+                                    Id = reader.GetInt32(reader.GetOrdinal("ProductTypeId")),
+                                    Name = reader.GetString(reader.GetOrdinal("Name"))
+                                }
+                            });
+
+
+                        }
+                        List<Order> orders = orderHash.Values.ToList();
+
+                        reader.Close();
+
+                        return Ok(orders);
+                    }
+                    else { return new StatusCodeResult(StatusCodes.Status404NotFound); }
                 }
             }
         }
